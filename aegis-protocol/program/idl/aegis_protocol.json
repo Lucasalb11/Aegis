@@ -1,0 +1,469 @@
+{
+  "version": "0.1.0",
+  "name": "aegis_protocol",
+  "instructions": [
+    {
+      "name": "initializeVault",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "policy",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "dailySpendLimitLamports",
+          "type": "u64"
+        },
+        {
+          "name": "largeTxThresholdLamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "depositSol",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "requestSwapJupiter",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "policy",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "pendingAction",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amountInLamports",
+          "type": "u64"
+        },
+        {
+          "name": "amountOutLamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "approvePendingAction",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "pendingAction",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "balance",
+            "type": "u64"
+          },
+          {
+            "name": "dailySpent",
+            "type": "u64"
+          },
+          {
+            "name": "lastResetTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "policy",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "pendingActionsCount",
+            "type": "u8"
+          },
+          {
+            "name": "isActive",
+            "type": "bool"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Policy",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "publicKey"
+          },
+          {
+            "name": "dailySpendLimitLamports",
+            "type": "u64"
+          },
+          {
+            "name": "largeTxThresholdLamports",
+            "type": "u64"
+          },
+          {
+            "name": "allowedPrograms",
+            "type": {
+              "array": [
+                "publicKey",
+                5
+              ]
+            }
+          },
+          {
+            "name": "allowedProgramsCount",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "isActive",
+            "type": "bool"
+          },
+          {
+            "name": "largeTxCooldownSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PendingAction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "publicKey"
+          },
+          {
+            "name": "actionType",
+            "type": {
+              "defined": "ActionType"
+            }
+          },
+          {
+            "name": "amountLamports",
+            "type": "u64"
+          },
+          {
+            "name": "targetProgram",
+            "type": "publicKey"
+          },
+          {
+            "name": "targetAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "requester",
+            "type": "publicKey"
+          },
+          {
+            "name": "requestedAt",
+            "type": "i64"
+          },
+          {
+            "name": "expiresAt",
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": "ActionStatus"
+            }
+          },
+          {
+            "name": "approver",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "processedAt",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "ActionType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "LargeTransfer"
+          },
+          {
+            "name": "Swap"
+          },
+          {
+            "name": "LendingDeposit"
+          },
+          {
+            "name": "LendingWithdraw"
+          },
+          {
+            "name": "Stake"
+          },
+          {
+            "name": "Unstake"
+          },
+          {
+            "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ActionStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Approved"
+          },
+          {
+            "name": "Rejected"
+          },
+          {
+            "name": "Expired"
+          },
+          {
+            "name": "Failed"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidDailyLimit",
+      "msg": "Daily spend limit must be greater than zero"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidThreshold",
+      "msg": "Large transaction threshold must be greater than zero"
+    },
+    {
+      "code": 6003,
+      "name": "ThresholdExceedsDailyLimit",
+      "msg": "Large transaction threshold cannot exceed daily limit"
+    },
+    {
+      "code": 6004,
+      "name": "TooManyAllowedPrograms",
+      "msg": "Too many allowed programs"
+    },
+    {
+      "code": 6005,
+      "name": "DescriptionTooLong",
+      "msg": "Description too long"
+    },
+    {
+      "code": 6006,
+      "name": "TransactionBelowThreshold",
+      "msg": "Transaction amount is below the large transaction threshold"
+    },
+    {
+      "code": 6007,
+      "name": "ProgramNotAllowed",
+      "msg": "Target program is not in the allowed programs list"
+    },
+    {
+      "code": 6008,
+      "name": "DailyLimitExceeded",
+      "msg": "Daily spending limit exceeded"
+    },
+    {
+      "code": 6009,
+      "name": "ActionNotPending",
+      "msg": "Action is not in pending status"
+    },
+    {
+      "code": 6010,
+      "name": "ActionExpired",
+      "msg": "Action has expired"
+    },
+    {
+      "code": 6011,
+      "name": "VaultOwnerMismatch",
+      "msg": "Vault owner mismatch"
+    },
+    {
+      "code": 6012,
+      "name": "VaultNotActive",
+      "msg": "Vault is not active"
+    },
+    {
+      "code": 6013,
+      "name": "PolicyNotActive",
+      "msg": "Policy is not active"
+    },
+    {
+      "code": 6014,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance in vault"
+    },
+    {
+      "code": 6015,
+      "name": "BelowThreshold",
+      "msg": "Below large transaction threshold"
+    }
+  ],
+  "metadata": {
+    "address": "Aegis111111111111111111111111111111111111111"
+  }
+}

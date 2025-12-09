@@ -1,0 +1,26 @@
+{
+  "name": "aegis-protocol",
+  "version": "0.1.0",
+  "description": "Aegis Protocol - On-chain Safety Layer for AI Agents on Solana",
+  "private": true,
+  "workspaces": [
+    "app",
+    "program",
+    "sdk"
+  ],
+  "scripts": {
+    "dev": "pnpm --recursive run dev",
+    "build": "pnpm --recursive run build",
+    "clean": "pnpm --recursive run clean"
+  },
+  "keywords": [
+    "solana",
+    "blockchain",
+    "ai",
+    "defi",
+    "security",
+    "vault"
+  ],
+  "author": "Aegis Protocol Team",
+  "license": "MIT"
+}

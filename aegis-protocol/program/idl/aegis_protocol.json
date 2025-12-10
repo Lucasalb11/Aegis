@@ -1,142 +1,201 @@
 {
   "version": "0.1.0",
   "name": "aegis_protocol",
+  "address": "AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu",
   "instructions": [
     {
       "name": "initializeVault",
+      "discriminator": [48, 191, 163, 44, 71, 129, 63, 164],
       "accounts": [
-        {
-          "name": "owner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "policy",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "authority", "isMut": false, "isSigner": false },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "policy", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
       ],
       "args": [
-        {
-          "name": "dailySpendLimitLamports",
-          "type": "u64"
-        },
-        {
-          "name": "largeTxThresholdLamports",
-          "type": "u64"
-        }
+        { "name": "dailySpendLimitLamports", "type": "u64" },
+        { "name": "largeTxThresholdLamports", "type": "u64" },
+        { "name": "allowedPrograms", "type": { "vec": "pubkey" } }
       ]
     },
     {
       "name": "depositSol",
+      "discriminator": [108, 81, 78, 117, 125, 155, 56, 200],
       "accounts": [
-        {
-          "name": "owner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
       ],
       "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
+        { "name": "amount", "type": "u64" }
       ]
     },
     {
       "name": "requestSwapJupiter",
+      "discriminator": [67, 31, 165, 216, 208, 8, 199, 214],
       "accounts": [
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "policy",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "pendingAction",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        }
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "policy", "isMut": false, "isSigner": false },
+        { "name": "pendingAction", "isMut": true, "isSigner": false, "isOptional": true },
+        { "name": "sourceTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "destinationTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "jupiterProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "clock", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
       ],
       "args": [
-        {
-          "name": "amountInLamports",
-          "type": "u64"
-        },
-        {
-          "name": "amountOutLamports",
-          "type": "u64"
-        }
+        { "name": "amountIn", "type": "u64" },
+        { "name": "amountOutMin", "type": "u64" },
+        { "name": "jupiterAccounts", "type": "bytes" },
+        { "name": "jupiterData", "type": "bytes" }
       ]
     },
     {
       "name": "approvePendingAction",
+      "discriminator": [152, 15, 227, 171, 30, 118, 136, 23],
       "accounts": [
-        {
-          "name": "owner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "pendingAction",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        }
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "pendingAction", "isMut": true, "isSigner": false },
+        { "name": "policy", "isMut": false, "isSigner": false },
+        { "name": "sourceTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "destinationTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "jupiterProgram", "isMut": false, "isSigner": false },
+        { "name": "clock", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "initializePool",
+      "discriminator": [95, 180, 10, 172, 84, 174, 232, 40],
+      "accounts": [
+        { "name": "payer", "isMut": true, "isSigner": true },
+        { "name": "mintA", "isMut": false, "isSigner": false },
+        { "name": "mintB", "isMut": false, "isSigner": false },
+        { "name": "pool", "isMut": true, "isSigner": false },
+        { "name": "vaultA", "isMut": true, "isSigner": false },
+        { "name": "vaultB", "isMut": true, "isSigner": false },
+        { "name": "lpMint", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "rent", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "feeBps", "type": "u16" }
+      ]
+    },
+    {
+      "name": "addLiquidity",
+      "discriminator": [181, 157, 89, 67, 143, 182, 52, 72],
+      "accounts": [
+        { "name": "user", "isMut": true, "isSigner": true },
+        { "name": "pool", "isMut": true, "isSigner": false },
+        { "name": "vaultA", "isMut": true, "isSigner": false },
+        { "name": "vaultB", "isMut": true, "isSigner": false },
+        { "name": "lpMint", "isMut": true, "isSigner": false },
+        { "name": "userTokenA", "isMut": true, "isSigner": false },
+        { "name": "userTokenB", "isMut": true, "isSigner": false },
+        { "name": "userLpToken", "isMut": true, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "amountA", "type": "u64" },
+        { "name": "amountB", "type": "u64" }
+      ]
+    },
+    {
+      "name": "removeLiquidity",
+      "discriminator": [80, 85, 209, 72, 24, 206, 177, 108],
+      "accounts": [
+        { "name": "user", "isMut": true, "isSigner": true },
+        { "name": "pool", "isMut": true, "isSigner": false },
+        { "name": "vaultA", "isMut": true, "isSigner": false },
+        { "name": "vaultB", "isMut": true, "isSigner": false },
+        { "name": "lpMint", "isMut": true, "isSigner": false },
+        { "name": "userLpToken", "isMut": true, "isSigner": false },
+        { "name": "userTokenA", "isMut": true, "isSigner": false },
+        { "name": "userTokenB", "isMut": true, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "lpAmount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "swap",
+      "discriminator": [248, 198, 158, 145, 225, 117, 135, 200],
+      "accounts": [
+        { "name": "user", "isMut": true, "isSigner": true },
+        { "name": "pool", "isMut": true, "isSigner": false },
+        { "name": "vaultA", "isMut": true, "isSigner": false },
+        { "name": "vaultB", "isMut": true, "isSigner": false },
+        { "name": "userSource", "isMut": true, "isSigner": false },
+        { "name": "userDestination", "isMut": true, "isSigner": false },
+        { "name": "swapSourceMint", "isMut": false, "isSigner": false },
+        { "name": "swapDestinationMint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "amountIn", "type": "u64" },
+        { "name": "minAmountOut", "type": "u64" },
+        { "name": "aToB", "type": "bool" }
+      ]
+    },
+    {
+      "name": "withdrawSol",
+      "discriminator": [145, 131, 74, 136, 65, 137, 42, 38],
+      "accounts": [
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "policy", "isMut": false, "isSigner": false },
+        { "name": "recipient", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "clock", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "withdrawSpl",
+      "discriminator": [181, 154, 94, 86, 62, 115, 6, 186],
+      "accounts": [
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "policy", "isMut": false, "isSigner": false },
+        { "name": "sourceTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "destinationTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "rejectPendingAction",
+      "discriminator": [108, 130, 25, 122, 56, 67, 109, 209],
+      "accounts": [
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "pendingAction", "isMut": true, "isSigner": false },
+        { "name": "policy", "isMut": false, "isSigner": false },
+        { "name": "clock", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "expirePendingAction",
+      "discriminator": [156, 103, 116, 196, 61, 103, 160, 34],
+      "accounts": [
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "pendingAction", "isMut": true, "isSigner": false },
+        { "name": "policy", "isMut": false, "isSigner": false },
+        { "name": "clock", "isMut": false, "isSigner": false }
       ],
       "args": []
     }
@@ -144,54 +203,112 @@
   "accounts": [
     {
       "name": "Vault",
+      "size": 138,
+      "discriminator": [211, 8, 232, 43, 2, 152, 117, 119],
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "balance",
-            "type": "u64"
-          },
-          {
-            "name": "dailySpent",
-            "type": "u64"
-          },
-          {
-            "name": "lastResetTimestamp",
-            "type": "i64"
-          },
-          {
-            "name": "policy",
-            "type": "publicKey"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "pendingActionsCount",
-            "type": "u8"
-          },
-          {
-            "name": "isActive",
-            "type": "bool"
-          },
-          {
-            "name": "reserved",
-            "type": {
-              "array": [
-                "u8",
-                7
-              ]
-            }
-          }
+          { "name": "owner", "type": "pubkey" },
+          { "name": "authority", "type": "pubkey" },
+          { "name": "balance", "type": "u64" },
+          { "name": "dailySpent", "type": "u64" },
+          { "name": "lastResetTimestamp", "type": "i64" },
+          { "name": "policy", "type": "pubkey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "pendingActionsCount", "type": "u8" },
+          { "name": "isActive", "type": "bool" },
+          { "name": "_reserved", "type": { "array": ["u8", 7] } }
+        ]
+      }
+    },
+    {
+      "name": "Policy",
+      "size": 229,
+      "discriminator": [222, 135, 7, 163, 235, 177, 33, 68],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "dailySpendLimitLamports", "type": "u64" },
+          { "name": "largeTxThresholdLamports", "type": "u64" },
+          { "name": "allowedPrograms", "type": { "array": ["pubkey", 5] } },
+          { "name": "allowedProgramsCount", "type": "u8" },
+          { "name": "bump", "type": "u8" },
+          { "name": "isActive", "type": "bool" },
+          { "name": "largeTxCooldownSeconds", "type": "u32" },
+          { "name": "_reserved", "type": { "array": ["u8", 6] } }
+        ]
+      }
+    },
+    {
+      "name": "PendingAction",
+      "size": 2040,
+      "discriminator": [10, 76, 29, 155, 104, 63, 34, 51],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "actionType", "type": { "defined": { "name": "ActionType" } } },
+          { "name": "amountLamports", "type": "u64" },
+          { "name": "targetProgram", "type": "pubkey" },
+          { "name": "targetAccount", "type": "pubkey" },
+          { "name": "minAmountOut", "type": "u64" },
+          { "name": "sourceTokenAccount", "type": "pubkey" },
+          { "name": "destinationTokenAccount", "type": "pubkey" },
+          { "name": "jupiterAccounts", "type": "bytes" },
+          { "name": "jupiterIxData", "type": "bytes" },
+          { "name": "description", "type": "string" },
+          { "name": "requester", "type": "pubkey" },
+          { "name": "requestedAt", "type": "i64" },
+          { "name": "expiresAt", "type": "i64" },
+          { "name": "status", "type": { "defined": { "name": "ActionStatus" } } },
+          { "name": "approver", "type": { "option": "pubkey" } },
+          { "name": "processedAt", "type": { "option": "i64" } },
+          { "name": "bump", "type": "u8" },
+          { "name": "_reserved", "type": { "array": ["u8", 7] } }
+        ]
+      }
+    },
+    {
+      "name": "Pool",
+      "size": 219,
+      "discriminator": [241, 154, 109, 4, 17, 177, 109, 188],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "mintA", "type": "pubkey" },
+          { "name": "mintB", "type": "pubkey" },
+          { "name": "vaultA", "type": "pubkey" },
+          { "name": "vaultB", "type": "pubkey" },
+          { "name": "lpMint", "type": "pubkey" },
+          { "name": "feeBps", "type": "u16" },
+          { "name": "lpSupply", "type": "u64" },
+          { "name": "creator", "type": "pubkey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "vaultABump", "type": "u8" },
+          { "name": "vaultBBump", "type": "u8" },
+          { "name": "lpMintBump", "type": "u8" },
+          { "name": "_reserved", "type": { "array": ["u8", 5] } }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "owner", "type": "pubkey" },
+          { "name": "authority", "type": "pubkey" },
+          { "name": "balance", "type": "u64" },
+          { "name": "dailySpent", "type": "u64" },
+          { "name": "lastResetTimestamp", "type": "i64" },
+          { "name": "policy", "type": "pubkey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "pendingActionsCount", "type": "u8" },
+          { "name": "isActive", "type": "bool" },
+          { "name": "_reserved", "type": { "array": ["u8", 7] } }
         ]
       }
     },
@@ -200,52 +317,15 @@
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "vault",
-            "type": "publicKey"
-          },
-          {
-            "name": "dailySpendLimitLamports",
-            "type": "u64"
-          },
-          {
-            "name": "largeTxThresholdLamports",
-            "type": "u64"
-          },
-          {
-            "name": "allowedPrograms",
-            "type": {
-              "array": [
-                "publicKey",
-                5
-              ]
-            }
-          },
-          {
-            "name": "allowedProgramsCount",
-            "type": "u8"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "isActive",
-            "type": "bool"
-          },
-          {
-            "name": "largeTxCooldownSeconds",
-            "type": "u32"
-          },
-          {
-            "name": "reserved",
-            "type": {
-              "array": [
-                "u8",
-                6
-              ]
-            }
-          }
+          { "name": "vault", "type": "pubkey" },
+          { "name": "dailySpendLimitLamports", "type": "u64" },
+          { "name": "largeTxThresholdLamports", "type": "u64" },
+          { "name": "allowedPrograms", "type": { "array": ["pubkey", 5] } },
+          { "name": "allowedProgramsCount", "type": "u8" },
+          { "name": "bump", "type": "u8" },
+          { "name": "isActive", "type": "bool" },
+          { "name": "largeTxCooldownSeconds", "type": "u32" },
+          { "name": "_reserved", "type": { "array": ["u8", 6] } }
         ]
       }
     },
@@ -254,106 +334,61 @@
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "vault",
-            "type": "publicKey"
-          },
-          {
-            "name": "actionType",
-            "type": {
-              "defined": "ActionType"
-            }
-          },
-          {
-            "name": "amountLamports",
-            "type": "u64"
-          },
-          {
-            "name": "targetProgram",
-            "type": "publicKey"
-          },
-          {
-            "name": "targetAccount",
-            "type": "publicKey"
-          },
-          {
-            "name": "description",
-            "type": "string"
-          },
-          {
-            "name": "requester",
-            "type": "publicKey"
-          },
-          {
-            "name": "requestedAt",
-            "type": "i64"
-          },
-          {
-            "name": "expiresAt",
-            "type": "i64"
-          },
-          {
-            "name": "status",
-            "type": {
-              "defined": "ActionStatus"
-            }
-          },
-          {
-            "name": "approver",
-            "type": {
-              "option": "publicKey"
-            }
-          },
-          {
-            "name": "processedAt",
-            "type": {
-              "option": "i64"
-            }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "reserved",
-            "type": {
-              "array": [
-                "u8",
-                7
-              ]
-            }
-          }
+          { "name": "vault", "type": "pubkey" },
+          { "name": "actionType", "type": { "defined": { "name": "ActionType" } } },
+          { "name": "amountLamports", "type": "u64" },
+          { "name": "targetProgram", "type": "pubkey" },
+          { "name": "targetAccount", "type": "pubkey" },
+          { "name": "minAmountOut", "type": "u64" },
+          { "name": "sourceTokenAccount", "type": "pubkey" },
+          { "name": "destinationTokenAccount", "type": "pubkey" },
+          { "name": "jupiterAccounts", "type": "bytes" },
+          { "name": "jupiterIxData", "type": "bytes" },
+          { "name": "description", "type": "string" },
+          { "name": "requester", "type": "pubkey" },
+          { "name": "requestedAt", "type": "i64" },
+          { "name": "expiresAt", "type": "i64" },
+          { "name": "status", "type": { "defined": { "name": "ActionStatus" } } },
+          { "name": "approver", "type": { "option": "pubkey" } },
+          { "name": "processedAt", "type": { "option": "i64" } },
+          { "name": "bump", "type": "u8" },
+          { "name": "_reserved", "type": { "array": ["u8", 7] } }
         ]
       }
-    }
-  ],
-  "types": [
+    },
+    {
+      "name": "Pool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "mintA", "type": "pubkey" },
+          { "name": "mintB", "type": "pubkey" },
+          { "name": "vaultA", "type": "pubkey" },
+          { "name": "vaultB", "type": "pubkey" },
+          { "name": "lpMint", "type": "pubkey" },
+          { "name": "feeBps", "type": "u16" },
+          { "name": "lpSupply", "type": "u64" },
+          { "name": "creator", "type": "pubkey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "vaultABump", "type": "u8" },
+          { "name": "vaultBBump", "type": "u8" },
+          { "name": "lpMintBump", "type": "u8" },
+          { "name": "_reserved", "type": { "array": ["u8", 5] } }
+        ]
+      }
+    },
     {
       "name": "ActionType",
       "type": {
         "kind": "enum",
         "variants": [
-          {
-            "name": "LargeTransfer"
-          },
-          {
-            "name": "Swap"
-          },
-          {
-            "name": "LendingDeposit"
-          },
-          {
-            "name": "LendingWithdraw"
-          },
-          {
-            "name": "Stake"
-          },
-          {
-            "name": "Unstake"
-          },
-          {
-            "name": "Custom"
-          }
+          { "name": "LargeTransfer" },
+          { "name": "Swap" },
+          { "name": "LendingDeposit" },
+          { "name": "LendingWithdraw" },
+          { "name": "Stake" },
+          { "name": "Unstake" },
+          { "name": "Custom" }
         ]
       }
     },
@@ -362,108 +397,82 @@
       "type": {
         "kind": "enum",
         "variants": [
-          {
-            "name": "Pending"
-          },
-          {
-            "name": "Approved"
-          },
-          {
-            "name": "Rejected"
-          },
-          {
-            "name": "Expired"
-          },
-          {
-            "name": "Failed"
-          }
+          { "name": "Pending" },
+          { "name": "Approved" },
+          { "name": "Rejected" },
+          { "name": "Expired" },
+          { "name": "Failed" }
         ]
       }
     }
   ],
   "errors": [
-    {
-      "code": 6000,
-      "name": "InvalidAmount",
-      "msg": "Amount must be greater than zero"
-    },
-    {
-      "code": 6001,
-      "name": "InvalidDailyLimit",
-      "msg": "Daily spend limit must be greater than zero"
-    },
-    {
-      "code": 6002,
-      "name": "InvalidThreshold",
-      "msg": "Large transaction threshold must be greater than zero"
-    },
-    {
-      "code": 6003,
-      "name": "ThresholdExceedsDailyLimit",
-      "msg": "Large transaction threshold cannot exceed daily limit"
-    },
-    {
-      "code": 6004,
-      "name": "TooManyAllowedPrograms",
-      "msg": "Too many allowed programs"
-    },
-    {
-      "code": 6005,
-      "name": "DescriptionTooLong",
-      "msg": "Description too long"
-    },
-    {
-      "code": 6006,
-      "name": "TransactionBelowThreshold",
-      "msg": "Transaction amount is below the large transaction threshold"
-    },
-    {
-      "code": 6007,
-      "name": "ProgramNotAllowed",
-      "msg": "Target program is not in the allowed programs list"
-    },
-    {
-      "code": 6008,
-      "name": "DailyLimitExceeded",
-      "msg": "Daily spending limit exceeded"
-    },
-    {
-      "code": 6009,
-      "name": "ActionNotPending",
-      "msg": "Action is not in pending status"
-    },
-    {
-      "code": 6010,
-      "name": "ActionExpired",
-      "msg": "Action has expired"
-    },
-    {
-      "code": 6011,
-      "name": "VaultOwnerMismatch",
-      "msg": "Vault owner mismatch"
-    },
-    {
-      "code": 6012,
-      "name": "VaultNotActive",
-      "msg": "Vault is not active"
-    },
-    {
-      "code": 6013,
-      "name": "PolicyNotActive",
-      "msg": "Policy is not active"
-    },
-    {
-      "code": 6014,
-      "name": "InsufficientBalance",
-      "msg": "Insufficient balance in vault"
-    },
-    {
-      "code": 6015,
-      "name": "BelowThreshold",
-      "msg": "Below large transaction threshold"
-    }
+    { "code": 6000, "name": "InvalidAmount", "msg": "Amount must be greater than zero" },
+    { "code": 6001, "name": "InvalidDailyLimit", "msg": "Daily spend limit must be greater than zero" },
+    { "code": 6002, "name": "InvalidThreshold", "msg": "Large transaction threshold must be greater than zero" },
+    { "code": 6003, "name": "ThresholdExceedsDailyLimit", "msg": "Large transaction threshold cannot exceed daily limit" },
+    { "code": 6004, "name": "TooManyAllowedPrograms", "msg": "Too many allowed programs" },
+    { "code": 6005, "name": "DescriptionTooLong", "msg": "Description too long" },
+    { "code": 6006, "name": "TransactionBelowThreshold", "msg": "Transaction amount is below the large transaction threshold" },
+    { "code": 6007, "name": "ProgramNotAllowed", "msg": "Target program is not in the allowed programs list" },
+    { "code": 6008, "name": "DailyLimitExceeded", "msg": "Daily spending limit exceeded" },
+    { "code": 6009, "name": "ActionNotPending", "msg": "Action is not in pending status" },
+    { "code": 6010, "name": "ActionExpired", "msg": "Action has expired" },
+    { "code": 6011, "name": "VaultOwnerMismatch", "msg": "Vault owner mismatch" },
+    { "code": 6012, "name": "VaultNotActive", "msg": "Vault is not active" },
+    { "code": 6013, "name": "PolicyNotActive", "msg": "Policy is not active" },
+    { "code": 6014, "name": "InsufficientBalance", "msg": "Insufficient balance in vault" },
+    { "code": 6015, "name": "InvalidTokenAccount", "msg": "Token account does not belong to vault" },
+    { "code": 6016, "name": "BelowThreshold", "msg": "Below large transaction threshold" },
+    { "code": 6017, "name": "JupiterAccountsTooLarge", "msg": "Jupiter accounts payload too large" },
+    { "code": 6018, "name": "JupiterIxDataTooLarge", "msg": "Jupiter instruction data too large" },
+    { "code": 6019, "name": "InvalidJupiterAccounts", "msg": "Invalid Jupiter accounts payload" },
+    { "code": 6020, "name": "MissingJupiterAccount", "msg": "Missing required Jupiter account" },
+    { "code": 6021, "name": "MissingSigner", "msg": "Expected signer account not provided" },
+    { "code": 6022, "name": "MissingWritable", "msg": "Expected writable account not provided" },
+    { "code": 6023, "name": "VaultSignerMissing", "msg": "Jupiter metas must include the vault as signer" },
+    { "code": 6024, "name": "ArithmeticOverflow", "msg": "Arithmetic overflow occurred" },
+    { "code": 6025, "name": "SlippageExceeded", "msg": "Slippage exceeded minimum output" },
+    { "code": 6026, "name": "CooldownNotElapsed", "msg": "Cooldown for large transaction has not elapsed" },
+    { "code": 6027, "name": "PendingActionsExhausted", "msg": "Exceeded maximum pending actions" },
+    { "code": 6028, "name": "PendingActionsUnderflow", "msg": "Pending actions count underflowed" },
+    { "code": 6029, "name": "PendingActionMissing", "msg": "Pending action account is required for large transaction" },
+    { "code": 6030, "name": "UnexpectedPendingAction", "msg": "Pending action account should not be provided for small transaction" },
+    { "code": 6031, "name": "ActionNotExpired", "msg": "Action is not yet expired" },
+    { "code": 6032, "name": "MintOrderInvalid", "msg": "Mint order must be mint_a < mint_b" },
+    { "code": 6033, "name": "InvalidFee", "msg": "Pool fee exceeds maximum allowed" },
+    { "code": 6034, "name": "ZeroLiquidityMinted", "msg": "Liquidity minted is zero" },
+    { "code": 6035, "name": "InsufficientLiquidity", "msg": "Insufficient liquidity available" },
+    { "code": 6036, "name": "InvalidVault", "msg": "Vault account does not match pool configuration" },
+    { "code": 6037, "name": "InvalidLpMint", "msg": "LP mint does not match pool authority" },
+    { "code": 6038, "name": "ZeroAmountOut", "msg": "Calculated amount out is zero" },
+    { "code": 6039, "name": "DuplicateJupiterAccount", "msg": "Duplicate account provided in Jupiter metas" },
+    { "code": 6040, "name": "InvalidTokenProgram", "msg": "Invalid token program provided" }
   ],
   "metadata": {
-    "address": "Aegis111111111111111111111111111111111111111"
+    "address": "AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu",
+    "origin": "anchor",
+    "binaryVersion": "0.32.0",
+    "libVersion": "0.32.0",
+    "instructions": [
+      { "name": "initializeVault", "discriminator": [48, 191, 163, 44, 71, 129, 63, 164] },
+      { "name": "depositSol", "discriminator": [108, 81, 78, 117, 125, 155, 56, 200] },
+      { "name": "requestSwapJupiter", "discriminator": [67, 31, 165, 216, 208, 8, 199, 214] },
+      { "name": "approvePendingAction", "discriminator": [152, 15, 227, 171, 30, 118, 136, 23] },
+      { "name": "initializePool", "discriminator": [95, 180, 10, 172, 84, 174, 232, 40] },
+      { "name": "addLiquidity", "discriminator": [181, 157, 89, 67, 143, 182, 52, 72] },
+      { "name": "removeLiquidity", "discriminator": [80, 85, 209, 72, 24, 206, 177, 108] },
+      { "name": "swap", "discriminator": [248, 198, 158, 145, 225, 117, 135, 200] },
+      { "name": "withdrawSol", "discriminator": [145, 131, 74, 136, 65, 137, 42, 38] },
+      { "name": "withdrawSpl", "discriminator": [181, 154, 94, 86, 62, 115, 6, 186] },
+      { "name": "rejectPendingAction", "discriminator": [108, 130, 25, 122, 56, 67, 109, 209] },
+      { "name": "expirePendingAction", "discriminator": [156, 103, 116, 196, 61, 103, 160, 34] }
+    ],
+    "accounts": [
+      { "name": "Vault", "discriminator": [211, 8, 232, 43, 2, 152, 117, 119], "size": 138 },
+      { "name": "Policy", "discriminator": [222, 135, 7, 163, 235, 177, 33, 68], "size": 229 },
+      { "name": "PendingAction", "discriminator": [10, 76, 29, 155, 104, 63, 34, 51], "size": 2040 },
+      { "name": "Pool", "discriminator": [241, 154, 109, 4, 17, 177, 109, 188], "size": 219 }
+    ]
   }
 }

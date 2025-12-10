@@ -77,13 +77,7 @@ aegis-protocol/
 │   │   └── types.ts   # Type definitions
 │   ├── scripts/       # Example scripts
 │   └── target/        # Generated types
-├── app/              # Next.js Frontend
-│   ├── src/
-│   │   ├── app/       # Next.js app router
-│   │   ├── components/# React components
-│   │   ├── hooks/     # Custom React hooks
-│   │   └── lib/       # Utilities
-│   └── public/        # Static assets
+├── app/              # (removed: focusing on on-chain program first)
 ├── docs/             # Documentation
 │   └── architecture.md # Technical details
 └── README.md         # This file
@@ -97,24 +91,33 @@ aegis-protocol/
 - Solana CLI + Anchor CLI ≥0.30.0
 - Phantom/Solflare wallet
 
-### ⚡ 5-Minute Setup
+### ⚡ 5-Minute Setup (devnet)
+
+Environment (devnet):
+```
+# sdk/.env
+ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
+PROGRAM_ID=41FsEq3HW76tijmW1GxLon4dP8x2Q8m7g9JQ6Y2BFpF1
+
+# aegis-frontend/.env
+NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_PROGRAM_ID=41FsEq3HW76tijmW1GxLon4dP8x2Q8m7g9JQ6Y2BFpF1
+NEXT_PUBLIC_CLUSTER=devnet
+NEXT_PUBLIC_EXPLORER_BASE=https://explorer.solana.com
+NEXT_PUBLIC_JUPITER_PROGRAM_ID=JUP6LkbZbjS3j5b3sVoEtD9tGWpRQdRr4M3TpXf6dA4
+```
 
 ```bash
 # Clone & install
 git clone <your-repo-url>
 cd aegis-protocol && pnpm install
 
-# Start local Solana validator (Terminal 1)
-solana-test-validator
-
-# Build & deploy program (Terminal 2)
+# Build & deploy program (devnet)
 cd program
-anchor build && anchor deploy
+anchor build && anchor deploy --provider.cluster devnet --provider.wallet ~/.config/solana/id.json
 
-# Start frontend (Terminal 3)
-cd ../app && pnpm dev
-
-# 🎉 Ready at http://localhost:3000
+# Frontend (Next.js)
+cd ../aegis-frontend && pnpm install && pnpm dev --port 3000
 ```
 
 ## 🎯 Hackathon Demo (5 Minutes)
@@ -123,21 +126,14 @@ cd ../app && pnpm dev
 
 ### Setup (1 min)
 ```bash
-solana-test-validator                    # Terminal 1
-cd program && anchor build && anchor deploy  # Terminal 2
-cd ../app && pnpm dev                   # Terminal 3
+solana-test-validator                                    # Terminal 1 (optional, for local)
+cd program && anchor build && anchor deploy --provider.cluster devnet  # Terminal 2
+cd ../aegis-frontend && pnpm dev --port 3000             # Terminal 3 (UI)
 ```
 
 ### Demo Script
 
-| Step | Action | Expected Result | Key Point |
-|------|--------|----------------|-----------|
-| 1 | Open http://localhost:3000 → Connect wallet | Wallet connected | ✅ User onboarding |
-| 2 | Create vault: Daily limit `10 SOL`, Threshold `2 SOL` | Vault PDA deployed | ✅ Policy configuration |
-| 3 | Deposit `5 SOL` to vault | Balance updates | ✅ Fund management |
-| 4 | **Small Swap**: Click "0.5 SOL → USDC" | ✅ Executes immediately | **AI Autonomy** |
-| 5 | **Large Swap**: Click "1.5 SOL → USDC" | ⏳ Pending action created | **Human Oversight** |
-| 6 | **Approve** pending action | ✅ Large swap executes | **Security Control** |
+> UI pronta em `aegis-frontend` (Next.js). Use o fluxo completo: criar vault, depositar SOL, pedir swap (pequeno → executa; grande → pending), aprovar pending.
 
 ### 🎉 Demo Highlights
 - **🔓 AI Freedom**: Small trades execute instantly within policies
@@ -202,7 +198,7 @@ pnpm --filter sdk test        # SDK tests
 
 - [Architecture Details](docs/architecture.md) - Technical implementation
 - [API Reference](sdk/README.md) - SDK documentation
-- [Frontend Guide](app/README.md) - UI development
+- [Frontend Guide](../aegis-frontend/README.md) - UI devnet dashboard
 
 ---
 

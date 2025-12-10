@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Liquidity Flow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2559f4",
+            "background-light": "#f5f6f8",
+            "background-dark": "#101422",
+            "accent-orange": "#FFA500"
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<div class="flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-10 py-4 font-display">
+<div class="flex items-center gap-4 text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Aegis Protocol</h2>
+</div>
+<nav class="flex flex-1 justify-center gap-8">
+<div class="flex items-center gap-9">
+<a class="text-white/70 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">Swap</a>
+<a class="text-white relative text-sm font-medium leading-normal" href="#">
+              Pools
+              <span class="absolute bottom-[-1.3rem] left-0 h-0.5 w-full bg-accent-orange"></span>
+</a>
+<a class="text-white/70 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">Stake</a>
+<a class="text-white/70 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">Analytics</a>
+</div>
+</nav>
+<div class="flex justify-end min-w-[200px]">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Connect Wallet</span>
+</button>
+</div>
+</header>
+<main class="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="flex flex-col gap-6">
+<div class="flex items-center gap-4">
+<a class="text-white/60 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">arrow_back</span>
+</a>
+<h1 class="text-white text-3xl font-bold leading-tight tracking-[-0.03em]">Add Liquidity</h1>
+</div>
+<div class="rounded-xl border border-white/10 bg-[#1b1e27] p-6 flex flex-col gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center text-sm text-white/60">
+<span>You deposit</span>
+<span>Balance: 12.5 SOL</span>
+</div>
+<div class="relative">
+<div class="flex items-center bg-[#101422] rounded-lg p-4">
+<div class="flex-1">
+<input class="form-input w-full bg-transparent text-white text-3xl font-medium focus:outline-none focus:ring-0 border-none p-0" placeholder="0.0" type="number" value="10.5"/>
+</div>
+<div class="flex items-center gap-2">
+<img alt="SOL token icon" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOc2v63wG7G_vjriVQDPKbl7GcaOeGugQjhP8XT1sFfVW8IfMfB1yWMRRAXNRMOeUsJP_-31PoYUzTqUY0NuZrff-G8j-5vxc-pds83pc--J7NrJJcBWxVTDjl0Edg6ElQRDnApc4Sji6B-46nn_WFo_mdrZBq8lp1jzklSZT6AK20QIuDn4ojmefNJWVkAKP9B7Ib0GNUJRv5nS_gbCivNBtV4PnWpNeodiQkGenvtgnJGdf3xUBJyiyuw7vnWNJRhlk3KKzNvn1L"/>
+<span class="text-white font-bold text-lg">SOL</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center my-[-1.25rem] z-10">
+<div class="bg-[#1b1e27] border-4 border-[#101422] rounded-full p-1 text-white/80">
+<span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center text-sm text-white/60">
+<span>You deposit</span>
+<span>Balance: 3,450.75 USDC</span>
+</div>
+<div class="relative">
+<div class="flex items-center bg-[#101422] rounded-lg p-4">
+<div class="flex-1">
+<input class="form-input w-full bg-transparent text-white text-3xl font-medium focus:outline-none focus:ring-0 border-none p-0" placeholder="0.0" type="number" value="1,575.00"/>
+</div>
+<div class="flex items-center gap-2">
+<img alt="USDC token icon" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAykMhiUJhX_Q_0jS-jnKFU-knoD1oau_n2p2Ru_xQDpK1kPTWnYPZOKImrwQEAm_4aJeuLM4wsaI7X2nxCoTAWtoBY_gTKvOSe07nl4KEuCPr6kRml2G9wNhtMdA4FfidRYKxWy99Vh0nMeI59vq6EmIiI8R2iSU-GhRt1cVySx0xdNpfoVNXsY9AbODho7szpVt1CIxYIdL0mSqQn-nX1JtMhpLei1TOloY7gMDHjmbmWapt9WsQXT1Z4gYIt4PX7C_B1rdxSaB70"/>
+<span class="text-white font-bold text-lg">USDC</span>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-white/10 my-2"></div>
+<div class="flex flex-col gap-3 text-sm">
+<h3 class="text-white font-medium mb-1">Summary</h3>
+<div class="flex justify-between items-center text-white/80">
+<span>SOL per USDC</span>
+<span class="text-white font-medium">0.006667</span>
+</div>
+<div class="flex justify-between items-center text-white/80">
+<span>USDC per SOL</span>
+<span class="text-white font-medium">150.00</span>
+</div>
+<div class="flex justify-between items-center text-white/80">
+<span>Share of Pool</span>
+<span class="text-white font-medium">0.25%</span>
+</div>
+<div class="flex justify-between items-center text-white/80">
+<span>Network Fee</span>
+<span class="text-white font-medium">~0.00001 SOL</span>
+</div>
+</div>
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors mt-2">
+              Supply
+            </button>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,11 @@
+node_modules
+.DS_Store
+.env
+.env.*
+.secrets/
+aegis-frontend/.env.local
+aegis-frontend/.next/
+aegis-frontend/.vercel
+aegis-protocol/.env
+aegis-protocol/.env.*
+aegis-protocol/.secrets/

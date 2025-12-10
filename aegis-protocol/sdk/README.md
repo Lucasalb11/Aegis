@@ -4,6 +4,13 @@ TypeScript client library for integrating Aegis Protocol into AI agents and appl
 
 ## 📦 Installation
 
+Create a devnet `.env` (used by tests/examples):
+
+```
+ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
+PROGRAM_ID=41FsEq3HW76tijmW1GxLon4dP8x2Q8m7g9JQ6Y2BFpF1
+```
+
 ```bash
 npm install @aegis/sdk
 # or
@@ -81,9 +88,10 @@ interface SwapRequestParams {
   fromMint: PublicKey;
   toMint: PublicKey;
   amountOutMin: BN;
-  jupiterRoute?: any;        // Jupiter route data
-  jupiterAccounts?: Buffer;  // Serialized Jupiter account metas
-  jupiterData?: Buffer;      // Serialized Jupiter instruction data
+  jupiterIx?: TransactionInstruction; // Jupiter IX (preferred)
+  jupiterMetas?: AccountMeta[];       // Raw metas (optional if jupiterIx provided)
+  jupiterAccounts?: Buffer;           // Serialized Jupiter account metas
+  jupiterData?: Buffer;               // Serialized Jupiter instruction data
 }
 
 interface VaultInfo {
@@ -117,6 +125,7 @@ interface PolicyInfo {
 import { AegisClient, PolicyConfig, SwapRequestParams } from '@aegis/sdk';
 import { Connection, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { BN } from '@coral-xyz/anchor';
+import { AegisClient as Client } from '@aegis/sdk';
 
 // Initialize client
 const connection = new Connection('https://api.devnet.solana.com');
@@ -138,7 +147,6 @@ const swapParams: SwapRequestParams = {
   fromMint: WSOL_MINT,                           // wSOL
   toMint: USDC_MINT,                            // USDC
   amountOutMin: new BN(0.45 * LAMPORTS_PER_SOL), // Min 0.45 USDC
-  // jupiterRoute: await getJupiterQuote(),     // From Jupiter API
 };
 
 await aegis.requestSwap(swapParams); // Executes immediately
@@ -155,6 +163,38 @@ const largeSwapParams: SwapRequestParams = {
 
 const { pendingAction } = await aegis.requestSwap(largeSwapParams);
 // pendingAction created - requires manual approval
+```
+
+### Jupiter route serialization helper
+When fetching swap instructions from Jupiter, serialize metas and data before sending to `requestSwap`:
+
+```typescript
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { AegisClient } from '@aegis/sdk';
+
+// Suppose you already called the Jupiter quote + swap-instructions REST endpoints
+const jupiterIx: TransactionInstruction = new TransactionInstruction({
+  programId: new PublicKey(response.swapInstruction.programId),
+  keys: response.swapInstruction.accounts.map((a) => ({
+    pubkey: new PublicKey(a.pubkey),
+    isSigner: a.isSigner,
+    isWritable: a.isWritable,
+  })),
+  data: Buffer.from(response.swapInstruction.data, 'base64'),
+});
+
+const metas = AegisClient.serializeJupiterMetas(jupiterIx.keys);
+
+await aegis.requestSwap({
+  vaultPubkey: vault,
+  amount: amountLamports,
+  fromMint: inputMint,
+  toMint: outputMint,
+  amountOutMin: new BN(response.quote.otherAmountThreshold),
+  jupiterIx,
+  jupiterAccounts: metas,
+  jupiterData: jupiterIx.data,
+});
 ```
 
 ### Policy Monitoring

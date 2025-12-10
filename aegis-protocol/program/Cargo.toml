@@ -13,6 +13,7 @@ no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build"]
 default = []
 
 [profile.release]
@@ -26,7 +27,9 @@ codegen-units = 1
 
 [dependencies]
 anchor-lang = "0.32.0"
+anchor-spl = "0.32.0"
+pyth-sdk-solana = "0.10.0"
 getrandom = { version = "0.2", features = ["custom"] }
 
 [dev-dependencies]
-anchor-client = "0.30.0"
+anchor-client = "0.30.1"

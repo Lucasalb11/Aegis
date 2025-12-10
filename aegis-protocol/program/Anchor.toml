@@ -3,10 +3,10 @@ seeds = true
 skip-lint = false
 
 [programs.localnet]
-aegis_protocol = "Aegis111111111111111111111111111111111111111"
+aegis_protocol = "AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu"
 
 [programs.devnet]
-aegis_protocol = "41FsEq3HW76tijmW1GxLon4dP8x2Q8m7g9JQ6Y2BFpF1"
+aegis_protocol = "AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu"
 
 [programs.mainnet]
 aegis_protocol = "Aegis111111111111111111111111111111111111111"
@@ -15,8 +15,8 @@ aegis_protocol = "Aegis111111111111111111111111111111111111111"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
-wallet = "wallets/aegis-deploy-wallet.json"
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

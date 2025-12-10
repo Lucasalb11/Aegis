@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: radial-gradient(circle at 20% 20%, rgba(37, 89, 244, 0.08), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(255, 165, 0, 0.05), transparent 30%),
+    #101422;
+}
+
+.card-surface {
+  @apply rounded-lg border border-white/10 bg-white/5 backdrop-blur;
+}
+
+.input {
+  @apply rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50;
+}

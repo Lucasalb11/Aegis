@@ -1,24 +1,35 @@
-import { Connection, PublicKey, Transaction, Signer } from '@solana/web3.js';
+import {
+  AccountMeta,
+  Connection,
+  PublicKey,
+  TransactionInstruction,
+  SystemProgram,
+  SYSVAR_CLOCK_PUBKEY,
+} from '@solana/web3.js';
 import { AnchorProvider, Program, BN, Idl, Wallet } from '@coral-xyz/anchor';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { EventEmitter } from 'eventemitter3';
 import idlJson from './idl.json';
 
 // Add address and metadata to IDL
-const idl = { 
-  ...idlJson, 
-  address: '',
+const idl = {
+  ...idlJson,
+  address: idlJson.address ?? idlJson.metadata?.address,
   metadata: {
     name: idlJson.name,
     version: idlJson.version,
-    spec: '0.1.0'
-  }
+    spec: '0.1.0',
+  },
 } as any as Idl;
+
+export const MAX_JUPITER_ACCOUNTS_LEN = 1024;
+export const MAX_JUPITER_IX_DATA_LEN = 512;
 
 // Types
 export interface PolicyConfig {
   dailySpendLimitLamports: BN;
   largeTxThresholdLamports: BN;
+  allowedPrograms?: PublicKey[];
 }
 
 export interface SwapRequestParams {
@@ -27,7 +38,8 @@ export interface SwapRequestParams {
   fromMint: PublicKey;
   toMint: PublicKey;
   amountOutMin: BN;
-  jupiterRoute?: any; // Jupiter route data - simplified for now
+  jupiterIx?: TransactionInstruction; // Optional Jupiter IX to derive metas/data
+  jupiterMetas?: AccountMeta[]; // Raw metas (if already parsed)
   jupiterAccounts?: Buffer; // Serialized Jupiter account metas
   jupiterData?: Buffer; // Serialized Jupiter instruction data
 }
@@ -47,6 +59,10 @@ export class AegisClient extends EventEmitter {
   private program: Program<Idl>;
   private wallet: Wallet;
 
+  private static readonly DEFAULT_ALLOWED_PROGRAMS = [
+    new PublicKey('JUP6LkbZbjS3j5b3sVoEtD9tGWpRQdRr4M3TpXf6dA4'),
+  ];
+
   constructor(config: AegisClientConfig) {
     super();
 
@@ -57,6 +73,53 @@ export class AegisClient extends EventEmitter {
       return new (Program as any)(idl, programId, provider);
     };
     this.program = createProgram(idl as unknown as Idl, config.programId, this.provider);
+  }
+
+  /**
+   * Serialize Jupiter AccountMeta[] into a Borsh Vec<u8> expected by the program.
+   * Throws if the serialized buffer exceeds on-chain MAX_* limits.
+   */
+  static serializeJupiterMetas(metas: AccountMeta[]): Buffer {
+    const length = metas.length;
+    const buf = Buffer.alloc(4 + length * 34); // u32 len + (32 + 1 + 1) per meta
+    buf.writeUInt32LE(length, 0);
+    let offset = 4;
+    metas.forEach((meta) => {
+      meta.pubkey.toBuffer().copy(buf, offset);
+      offset += 32;
+      buf.writeUInt8(meta.isSigner ? 1 : 0, offset);
+      offset += 1;
+      buf.writeUInt8(meta.isWritable ? 1 : 0, offset);
+      offset += 1;
+    });
+
+    if (buf.length > MAX_JUPITER_ACCOUNTS_LEN) {
+      throw new Error(`Serialized Jupiter metas overflow (${buf.length} > ${MAX_JUPITER_ACCOUNTS_LEN})`);
+    }
+    return buf;
+  }
+
+  /**
+   * Deserialize Jupiter metas from Borsh Vec<u8> (helper for pending approvals)
+   */
+  static deserializeJupiterMetas(buf: Buffer): AccountMeta[] {
+    if (!buf?.length) return [];
+    if (buf.length > MAX_JUPITER_ACCOUNTS_LEN) {
+      throw new Error(`Serialized Jupiter metas overflow (${buf.length} > ${MAX_JUPITER_ACCOUNTS_LEN})`);
+    }
+    const metas: AccountMeta[] = [];
+    const len = buf.readUInt32LE(0);
+    let offset = 4;
+    for (let i = 0; i < len; i++) {
+      const pubkey = new PublicKey(buf.slice(offset, offset + 32));
+      offset += 32;
+      const isSigner = buf.readUInt8(offset) === 1;
+      offset += 1;
+      const isWritable = buf.readUInt8(offset) === 1;
+      offset += 1;
+      metas.push({ pubkey, isSigner, isWritable });
+    }
+    return metas;
   }
 
   /**
@@ -75,6 +138,10 @@ export class AegisClient extends EventEmitter {
     txSignature: string;
   }> {
     const owner = this.wallet.publicKey;
+    const allowedPrograms =
+      policyConfig.allowedPrograms?.length
+        ? policyConfig.allowedPrograms
+        : AegisClient.DEFAULT_ALLOWED_PROGRAMS;
 
     // Derive PDA addresses
     const [vaultPDA] = PublicKey.findProgramAddressSync(
@@ -91,14 +158,15 @@ export class AegisClient extends EventEmitter {
     const tx = await this.program.methods
       .initializeVault(
         policyConfig.dailySpendLimitLamports,
-        policyConfig.largeTxThresholdLamports
+        policyConfig.largeTxThresholdLamports,
+        allowedPrograms
       )
       .accounts({
         owner,
         authority: owner,
         vault: vaultPDA,
         policy: policyPDA,
-        systemProgram: this.program.programId,
+        systemProgram: SystemProgram.programId,
       })
       .rpc();
 
@@ -116,21 +184,14 @@ export class AegisClient extends EventEmitter {
    */
   async depositSol(vaultPubkey: PublicKey, amountSol: number): Promise<string> {
     const owner = this.wallet.publicKey;
-    const amountLamports = new BN(amountSol * 1_000_000_000); // Convert SOL to lamports
-
-    // Derive policy PDA (needed for account validation)
-    const [policyPDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from('policy'), vaultPubkey.toBuffer()],
-      this.program.programId
-    );
+    const amountLamports = new BN(Math.round(amountSol * 1_000_000_000)); // Convert SOL to lamports safely
 
     const tx = await this.program.methods
       .depositSol(amountLamports)
       .accounts({
         owner,
         vault: vaultPubkey,
-        policy: policyPDA,
-        systemProgram: this.program.programId,
+        systemProgram: SystemProgram.programId,
       })
       .rpc();
 
@@ -152,9 +213,33 @@ export class AegisClient extends EventEmitter {
       fromMint,
       toMint,
       amountOutMin,
+      jupiterIx,
+      jupiterMetas,
       jupiterAccounts = Buffer.alloc(0),
       jupiterData = Buffer.alloc(0),
     } = params;
+
+    const resolvedMetas: AccountMeta[] | undefined = jupiterIx?.keys ?? jupiterMetas;
+    const serializedMetas =
+      jupiterAccounts?.length && !resolvedMetas
+        ? jupiterAccounts
+        : resolvedMetas?.length
+          ? AegisClient.serializeJupiterMetas(resolvedMetas)
+          : Buffer.alloc(0);
+
+    if (serializedMetas.length > MAX_JUPITER_ACCOUNTS_LEN) {
+      throw new Error('Jupiter metas buffer exceeds on-chain limit');
+    }
+
+    const instructionData = jupiterData?.length
+      ? jupiterData
+      : jupiterIx
+        ? Buffer.from(jupiterIx.data)
+        : Buffer.alloc(0);
+
+    if (instructionData.length > MAX_JUPITER_IX_DATA_LEN) {
+      throw new Error('Jupiter instruction data exceeds on-chain limit');
+    }
 
     // Derive PDAs
     const [policyPDA] = PublicKey.findProgramAddressSync(
@@ -162,15 +247,25 @@ export class AegisClient extends EventEmitter {
       this.program.programId
     );
 
-    // Get vault account to check pending actions count
+    // Fetch vault and policy for thresholds/counts
     const vaultAccount = await (this.program.account as any).vault.fetch(vaultPubkey);
+    const policyAccount = await (this.program.account as any).policy.fetch(policyPDA);
 
     // Derive source and destination token accounts
-    const sourceTokenAccount = await getAssociatedTokenAddress(fromMint, vaultPubkey, true);
-    const destinationTokenAccount = await getAssociatedTokenAddress(toMint, vaultPubkey, true);
+    const sourceTokenAccount = await getAssociatedTokenAddress(
+      fromMint,
+      vaultPubkey,
+      true
+    );
+    const destinationTokenAccount = await getAssociatedTokenAddress(
+      toMint,
+      vaultPubkey,
+      true
+    );
 
     // Check if this is a large transaction
-    const isLargeTx = amount.gt(vaultAccount.policy.largeTxThresholdLamports);
+    const largeThreshold = new BN(policyAccount.largeTxThresholdLamports);
+    const isLargeTx = amount.gt(largeThreshold);
 
     let accounts: any = {
       authority: this.wallet.publicKey,
@@ -178,18 +273,20 @@ export class AegisClient extends EventEmitter {
       sourceTokenAccount,
       destinationTokenAccount,
       policy: policyPDA,
-      jupiterProgram: new PublicKey('JUP6LkbZbjS3j5b3sVoEtD9tGWpRQdRr4M3TpXf6dA4'),
-      systemProgram: this.program.programId,
-      clock: this.program.programId, // Sysvar clock
+      jupiterProgram: jupiterIx?.programId ?? new PublicKey('JUP6LkbZbjS3j5b3sVoEtD9tGWpRQdRr4M3TpXf6dA4'),
+      systemProgram: SystemProgram.programId,
+      clock: SYSVAR_CLOCK_PUBKEY,
     };
 
+    let pendingActionPDA: PublicKey | undefined;
     if (isLargeTx) {
       // Derive pending action PDA
-      const [pendingActionPDA] = PublicKey.findProgramAddressSync(
+      const pendingActionsCount = Number(vaultAccount.pendingActionsCount ?? 0);
+      [pendingActionPDA] = PublicKey.findProgramAddressSync(
         [
           Buffer.from('pending_action'),
           vaultPubkey.toBuffer(),
-          Buffer.from([vaultAccount.pendingActionsCount]),
+          Buffer.from([pendingActionsCount]),
         ],
         this.program.programId
       );
@@ -197,23 +294,40 @@ export class AegisClient extends EventEmitter {
       accounts.pendingAction = pendingActionPDA;
     }
 
+    const remainingAccounts =
+      resolvedMetas?.length
+        ? resolvedMetas
+            .filter(
+              (meta) =>
+                !meta.pubkey.equals(vaultPubkey) &&
+                !meta.pubkey.equals(sourceTokenAccount) &&
+                !meta.pubkey.equals(destinationTokenAccount)
+            )
+            .map((meta) => ({
+              pubkey: meta.pubkey,
+              isSigner: meta.isSigner,
+              isWritable: meta.isWritable,
+            }))
+        : [];
+
     const tx = await this.program.methods
       .requestSwapJupiter(
         amount,
         amountOutMin,
-        Array.from(jupiterAccounts),
-        Array.from(jupiterData)
+        Array.from(serializedMetas),
+        Array.from(instructionData)
       )
       .accounts(accounts)
+      .remainingAccounts(remainingAccounts)
       .rpc();
 
     const result: any = { txSignature: tx };
 
-    if (isLargeTx) {
-      result.pendingAction = accounts.pendingAction;
+    if (isLargeTx && pendingActionPDA) {
+      result.pendingAction = pendingActionPDA;
       this.emit('pendingActionCreated', {
         vault: vaultPubkey,
-        pendingAction: accounts.pendingAction,
+        pendingAction: pendingActionPDA,
         txSignature: tx
       });
     } else {
@@ -233,7 +347,29 @@ export class AegisClient extends EventEmitter {
    */
   async approvePendingAction(pendingActionPubkey: PublicKey): Promise<string> {
     // Fetch pending action to get vault pubkey
-    const pendingAction = await (this.program.account as any).pendingAction.fetch(pendingActionPubkey);
+    const pendingAction = await (this.program.account as any).pendingAction.fetch(
+      pendingActionPubkey
+    );
+    const metas = pendingAction.jupiterAccounts?.length
+      ? AegisClient.deserializeJupiterMetas(Buffer.from(pendingAction.jupiterAccounts))
+      : [];
+    const remainingAccounts = metas
+      .filter(
+        (meta: AccountMeta) =>
+          !meta.pubkey.equals(pendingAction.vault) &&
+          !meta.pubkey.equals(pendingAction.sourceTokenAccount) &&
+          !meta.pubkey.equals(pendingAction.destinationTokenAccount)
+      )
+      .map((meta: AccountMeta) => ({
+        pubkey: meta.pubkey,
+        isSigner: meta.isSigner,
+        isWritable: meta.isWritable,
+      }));
+
+    const [policyPDA] = PublicKey.findProgramAddressSync(
+      [Buffer.from('policy'), pendingAction.vault.toBuffer()],
+      this.program.programId
+    );
 
     const tx = await this.program.methods
       .approvePendingAction()
@@ -241,8 +377,13 @@ export class AegisClient extends EventEmitter {
         owner: this.wallet.publicKey,
         vault: pendingAction.vault,
         pendingAction: pendingActionPubkey,
-        clock: this.program.programId, // Sysvar clock
+        policy: policyPDA,
+        sourceTokenAccount: pendingAction.sourceTokenAccount,
+        destinationTokenAccount: pendingAction.destinationTokenAccount,
+        jupiterProgram: pendingAction.targetProgram,
+        clock: SYSVAR_CLOCK_PUBKEY,
       })
+      .remainingAccounts(remainingAccounts)
       .rpc();
 
     this.emit('pendingActionApproved', {
@@ -277,9 +418,20 @@ export class AegisClient extends EventEmitter {
    * Get pending actions for a vault
    */
   async getPendingActions(vaultPubkey: PublicKey) {
-    // This would require indexing or querying all pending actions
-    // For now, return empty array as placeholder
-    return [];
+    const discriminatorOffset = 8; // anchor account discriminator
+    const filters = [
+      {
+        memcmp: {
+          offset: discriminatorOffset,
+          bytes: vaultPubkey.toBase58(),
+        },
+      },
+    ];
+    const accounts = await (this.program.account as any).pendingAction.all(filters);
+    return accounts.map((acc: any) => ({
+      publicKey: acc.publicKey as PublicKey,
+      account: acc.account,
+    }));
   }
 
   /**
@@ -294,6 +446,68 @@ export class AegisClient extends EventEmitter {
    */
   getProvider(): AnchorProvider {
     return this.provider;
+  }
+
+  /**
+   * Execute a direct swap against the Aegis AMM pool (constant-product).
+   * Assumes the user already has ATAs for both mints.
+   */
+  async swap(params: {
+    fromMint: PublicKey;
+    toMint: PublicKey;
+    amountIn: BN;
+    minAmountOut: BN;
+  }): Promise<string> {
+    const { fromMint, toMint, amountIn, minAmountOut } = params;
+    if (fromMint.equals(toMint)) {
+      throw new Error('fromMint and toMint must differ');
+    }
+
+    // Sort mints to derive the pool PDA (mint_a < mint_b)
+    const [mintA, mintB] =
+      fromMint.toBuffer().compare(toMint.toBuffer()) < 0
+        ? [fromMint, toMint]
+        : [toMint, fromMint];
+
+    const [poolPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('pool'), mintA.toBuffer(), mintB.toBuffer()],
+      this.program.programId
+    );
+
+    // Fetch on-chain pool to ensure it exists and get vault addresses
+    const poolAccount = await (this.program.account as any).pool.fetchNullable(poolPda);
+    if (!poolAccount) {
+      throw new Error('Pool not found for provided mints');
+    }
+
+    const aToB = fromMint.equals(poolAccount.mintA);
+
+    const userSource = await getAssociatedTokenAddress(fromMint, this.wallet.publicKey);
+    const userDestination = await getAssociatedTokenAddress(toMint, this.wallet.publicKey);
+
+    const tx = await this.program.methods
+      .swap(amountIn, minAmountOut, aToB)
+      .accounts({
+        user: this.wallet.publicKey,
+        pool: poolPda,
+        vaultA: poolAccount.vaultA,
+        vaultB: poolAccount.vaultB,
+        userSource,
+        userDestination,
+        swapSourceMint: fromMint,
+        swapDestinationMint: toMint,
+        tokenProgram: (await import('@solana/spl-token')).TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    this.emit('swapExecuted', {
+      vault: null,
+      amountIn,
+      amountOutMin: minAmountOut,
+      txSignature: tx,
+    });
+
+    return tx;
   }
 }
 

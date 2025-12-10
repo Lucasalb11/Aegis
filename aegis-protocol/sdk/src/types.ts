@@ -1,10 +1,11 @@
-import { PublicKey } from '@solana/web3.js';
+import { AccountMeta, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { BN } from '@coral-xyz/anchor';
 
 // Re-export types from main index
 export interface PolicyConfig {
   dailySpendLimitLamports: BN;
   largeTxThresholdLamports: BN;
+  allowedPrograms?: PublicKey[];
 }
 
 export interface SwapRequestParams {
@@ -13,7 +14,8 @@ export interface SwapRequestParams {
   fromMint: PublicKey;
   toMint: PublicKey;
   amountOutMin: BN;
-  jupiterRoute?: any;
+  jupiterIx?: TransactionInstruction;
+  jupiterMetas?: AccountMeta[];
   jupiterAccounts?: Buffer;
   jupiterData?: Buffer;
 }
@@ -54,6 +56,8 @@ export interface PendingActionInfo {
   amountLamports: BN;
   targetProgram: PublicKey;
   targetAccount: PublicKey;
+  sourceTokenAccount: PublicKey;
+  destinationTokenAccount: PublicKey;
   description: string;
   requester: PublicKey;
   requestedAt: BN;
@@ -62,11 +66,18 @@ export interface PendingActionInfo {
   approver?: PublicKey;
   processedAt?: BN;
   bump: number;
+  jupiterAccounts: Buffer;
+  jupiterIxData: Buffer;
 }
 
 export enum ActionType {
-  Swap = 0,
-  // Add more action types as needed
+  LargeTransfer = 0,
+  Swap = 1,
+  LendingDeposit = 2,
+  LendingWithdraw = 3,
+  Stake = 4,
+  Unstake = 5,
+  Custom = 6,
 }
 
 export enum ActionStatus {
@@ -90,6 +101,8 @@ export const DEFAULT_PROGRAM_ID = new PublicKey('Aegis11111111111111111111111111
 export const JUPITER_PROGRAM_ID = new PublicKey('JUP6LkbZbjS3j5b3sVoEtD9tGWpRQdRr4M3TpXf6dA4');
 export const WSOL_MINT = new PublicKey('So11111111111111111111111111111111111111112');
 export const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+export const MAX_JUPITER_ACCOUNTS_LEN = 1024;
+export const MAX_JUPITER_IX_DATA_LEN = 512;
 
 // Utility functions
 export function lamportsToSol(lamports: BN): number {

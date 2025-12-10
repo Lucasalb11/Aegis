@@ -9,3 +9,4 @@ aegis-frontend/.vercel
 aegis-protocol/.env
 aegis-protocol/.env.*
 aegis-protocol/.secrets/
+test-ledger/

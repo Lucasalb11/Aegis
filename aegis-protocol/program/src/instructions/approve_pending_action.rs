@@ -40,10 +40,10 @@ pub struct ApprovePendingAction<'info> {
 }
 
 /// Handler for approve_pending_action instruction
-/// 
+///
 /// Validates approval authority and simulates action execution
 /// Updates vault state to reflect completed action
-pub fn handler(ctx: Context<ApprovePendingAction>) -> Result<()> {
+pub fn approve_pending_action(ctx: Context<ApprovePendingAction>) -> Result<()> {
     let vault = &mut ctx.accounts.vault;
     let pending_action = &mut ctx.accounts.pending_action;
     let clock = &ctx.accounts.clock;

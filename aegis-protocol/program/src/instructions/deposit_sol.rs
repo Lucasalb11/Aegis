@@ -30,4 +30,32 @@ pub struct DepositSol<'info> {
     pub system_program: Program<'info, System>,
 }
 
-// Handler removed - implemented directly in lib.rs
+pub fn deposit_sol(ctx: Context<DepositSol>, amount: u64) -> Result<()> {
+    require!(amount > 0, crate::ErrorCode::InvalidAmount);
+
+    let vault = &mut ctx.accounts.vault;
+    let owner = &ctx.accounts.owner;
+
+    // Transfer SOL from owner to vault
+    let transfer_ix = system_instruction::transfer(
+        &owner.key(),
+        &vault.key(),
+        amount,
+    );
+
+    anchor_lang::solana_program::program::invoke(
+        &transfer_ix,
+        &[
+            owner.to_account_info(),
+            vault.to_account_info(),
+        ],
+    )?;
+
+    // Update vault balance
+    vault.balance = vault.balance.checked_add(amount).unwrap();
+
+    msg!("Deposited {} lamports to vault", amount);
+    msg!("New vault balance: {} lamports", vault.balance);
+
+    Ok(())
+}

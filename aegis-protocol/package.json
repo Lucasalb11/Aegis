@@ -10,7 +10,10 @@
   "scripts": {
     "dev": "pnpm --recursive run dev",
     "build": "pnpm --recursive run build",
-    "clean": "pnpm --recursive run clean"
+    "clean": "pnpm --recursive run clean",
+    "deploy:devnet": "./scripts/deploy-devnet.sh",
+    "deploy:mainnet": "./scripts/deploy-mainnet.sh",
+    "test": "pnpm --recursive run test"
   },
   "keywords": [
     "solana",

@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use pyth_sdk_solana::load_price_feed_from_account_info;
+use std::str::FromStr;
 
 use crate::{
     constants::{DEFAULT_MAX_STALENESS_SECONDS, ORACLE_SLIPPAGE_BPS, PYTH_PROGRAM_ID},
@@ -143,7 +144,7 @@ fn read_pyth(feed: &AccountInfo) -> Result<(i64, i32, i64)> {
 
     let price_feed = load_price_feed_from_account_info(feed).map_err(|_| error!(ErrorCode::OraclePriceInvalid))?;
     let price = price_feed
-        .get_current_price()
+        .get_price_no_older_than(Clock::get()?.unix_timestamp, 60)
         .ok_or(error!(ErrorCode::OraclePriceInvalid))?;
 
     Ok((price.price, price.expo, price.publish_time))

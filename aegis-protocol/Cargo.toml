@@ -16,3 +16,5 @@ categories = ["cryptography::cryptocurrencies"]
 [workspace.dependencies]
 anchor-lang = "0.32.0"
 anchor-spl = "0.32.0"
+solana-instruction = "=2.2.1"
+

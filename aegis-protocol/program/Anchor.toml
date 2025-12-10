@@ -2,6 +2,9 @@
 seeds = true
 skip-lint = false
 
+[toolchain]
+anchor_version = "0.32.0"
+
 [programs.localnet]
 aegis_protocol = "AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu"
 
@@ -15,8 +18,8 @@ aegis_protocol = "Aegis111111111111111111111111111111111111111"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "npm run test"

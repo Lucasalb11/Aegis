@@ -64,12 +64,14 @@ pub struct RequestSwapJupiter<'info> {
 }
 
 /// Handler for request_swap_jupiter instruction
-/// 
+///
 /// Implements the core policy logic for AI agent swaps
-pub fn handler(
+pub fn request_swap_jupiter(
     ctx: Context<RequestSwapJupiter>,
     amount_in_lamports: u64,
     amount_out_lamports: u64,
+    jupiter_accounts: Vec<u8>,
+    jupiter_data: Vec<u8>,
 ) -> Result<()> {
     require!(amount_in_lamports > 0, crate::ErrorCode::InvalidAmount);
     require!(amount_out_lamports > 0, crate::ErrorCode::InvalidAmount);
@@ -116,7 +118,7 @@ pub fn handler(
         );
         pending_action_account.requester = ctx.accounts.authority.key();
         pending_action_account.requested_at = current_time;
-        pending_action_account.expires_at = current_time + PENDING_ACTION_TIMEOUT;
+        pending_action_account.expires_at = current_time + (24 * 60 * 60); // 24 hours
         pending_action_account.status = ActionStatus::Pending;
         pending_action_account.approver = None;
         pending_action_account.processed_at = None;

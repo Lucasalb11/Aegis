@@ -183,7 +183,8 @@ pub fn add_liquidity(ctx: Context<AddLiquidity>, amount_a: u64, amount_b: u64) -
         used_b,
     )?;
 
-    let signer_seeds = seeds::pool_signer_seeds(&ctx.accounts.pool);
+    let (_bump_bytes, signer_seeds) = seeds::pool_signer_seeds(&ctx.accounts.pool);
+    let signer_seeds_slice: Vec<&[u8]> = signer_seeds.iter().map(|s| s.as_slice()).collect();
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -192,7 +193,7 @@ pub fn add_liquidity(ctx: Context<AddLiquidity>, amount_a: u64, amount_b: u64) -
                 to: ctx.accounts.user_lp_token.to_account_info(),
                 authority: ctx.accounts.pool.to_account_info(),
             },
-            &[&signer_seeds],
+            &[&signer_seeds_slice],
         ),
         minted,
     )?;
@@ -232,7 +233,8 @@ pub fn swap(ctx: Context<Swap>, amount_in: u64, min_amount_out: u64, a_to_b: boo
         amount_in,
     )?;
 
-    let signer_seeds = seeds::pool_signer_seeds(&ctx.accounts.pool);
+    let (_bump_bytes, signer_seeds) = seeds::pool_signer_seeds(&ctx.accounts.pool);
+    let signer_seeds_slice: Vec<&[u8]> = signer_seeds.iter().map(|s| s.as_slice()).collect();
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -241,7 +243,7 @@ pub fn swap(ctx: Context<Swap>, amount_in: u64, min_amount_out: u64, a_to_b: boo
                 to: ctx.accounts.user_destination.to_account_info(),
                 authority: ctx.accounts.pool.to_account_info(),
             },
-            &[&signer_seeds],
+            &[&signer_seeds_slice],
         ),
         amount_out,
     )?;

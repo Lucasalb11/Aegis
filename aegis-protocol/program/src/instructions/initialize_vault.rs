@@ -50,4 +50,43 @@ pub struct InitializeVault<'info> {
     pub system_program: Program<'info, System>,
 }
 
-// Handler removed - implemented directly in lib.rs
+pub fn initialize_vault(
+    ctx: Context<InitializeVault>,
+    daily_spend_limit_lamports: u64,
+    large_tx_threshold_lamports: u64,
+    allowed_programs: Vec<Pubkey>,
+) -> Result<()> {
+    let vault = &mut ctx.accounts.vault;
+    let policy = &mut ctx.accounts.policy;
+
+    // Initialize vault state
+    vault.owner = ctx.accounts.owner.key();
+    vault.authority = ctx.accounts.authority.key();
+    vault.balance = 0;
+    vault.daily_spent = 0;
+    vault.last_reset_timestamp = Clock::get()?.unix_timestamp;
+    vault.policy = policy.key();
+    vault.bump = ctx.bumps.vault;
+    vault.pending_actions_count = 0;
+    vault.is_active = true;
+    vault._reserved = [0; 7];
+
+    // Initialize policy
+    policy.vault = vault.key();
+    policy.daily_spend_limit_lamports = daily_spend_limit_lamports;
+    policy.large_tx_threshold_lamports = large_tx_threshold_lamports;
+
+    // Convert Vec<Pubkey> to [Pubkey; MAX_ALLOWED_PROGRAMS]
+    let mut programs_array = [Pubkey::default(); 10]; // MAX_ALLOWED_PROGRAMS = 10
+    let copy_len = allowed_programs.len().min(5);
+    programs_array[..copy_len].copy_from_slice(&allowed_programs[..copy_len]);
+    policy.allowed_programs = programs_array;
+    policy.allowed_programs_count = copy_len as u8;
+
+    policy.bump = ctx.bumps.policy;
+    policy.is_active = true;
+    policy.large_tx_cooldown_seconds = 0;
+    policy._reserved = [0; 6];
+
+    Ok(())
+}

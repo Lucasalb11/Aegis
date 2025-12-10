@@ -95,16 +95,8 @@ aegis-protocol/
 
 Environment (devnet):
 ```
-# sdk/.env
-ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
-PROGRAM_ID=41FsEq3HW76tijmW1GxLon4dP8x2Q8m7g9JQ6Y2BFpF1
-
-# aegis-frontend/.env
-NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
-NEXT_PUBLIC_PROGRAM_ID=41FsEq3HW76tijmW1GxLon4dP8x2Q8m7g9JQ6Y2BFpF1
-NEXT_PUBLIC_CLUSTER=devnet
-NEXT_PUBLIC_EXPLORER_BASE=https://explorer.solana.com
-NEXT_PUBLIC_JUPITER_PROGRAM_ID=JUP6LkbZbjS3j5b3sVoEtD9tGWpRQdRr4M3TpXf6dA4
+# .secrets/devnet/ contains wallet keypairs
+# Program ID: AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu
 ```
 
 ```bash
@@ -112,12 +104,36 @@ NEXT_PUBLIC_JUPITER_PROGRAM_ID=JUP6LkbZbjS3j5b3sVoEtD9tGWpRQdRr4M3TpXf6dA4
 git clone <your-repo-url>
 cd aegis-protocol && pnpm install
 
-# Build & deploy program (devnet)
+# Build program
 cd program
-anchor build && anchor deploy --provider.cluster devnet --provider.wallet ~/.config/solana/id.json
+anchor build
 
-# Frontend (Next.js)
-cd ../aegis-frontend && pnpm install && pnpm dev --port 3000
+# Deploy to devnet
+anchor deploy --provider.cluster devnet
+
+# Build SDK
+cd ../sdk && npm run build
+
+# Install frontend dependencies
+cd ../app && npm install
+
+# Start frontend
+npm run dev --port 3000
+```
+
+### 🏗️ Deploy Scripts
+
+Para deploy automatizado, use os scripts preparados:
+
+```bash
+# Deploy program to devnet
+cd program && npm run deploy:devnet
+
+# Build and publish SDK
+cd ../sdk && npm run build && npm publish
+
+# Deploy frontend to Vercel/Netlify
+cd ../app && npm run build && npm run deploy
 ```
 
 ## 🎯 Hackathon Demo (5 Minutes)
@@ -198,7 +214,64 @@ pnpm --filter sdk test        # SDK tests
 
 - [Architecture Details](docs/architecture.md) - Technical implementation
 - [API Reference](sdk/README.md) - SDK documentation
+
+## 📦 Tokenomics: Aegis Emission Vault
+
+- Mint: `$AEGIS`, decimals = 9, mint authority PDA `["reward_minter"]`, no freeze authority.
+- Genesis mint (one-time): `18,000,000,000 * 10^9` tokens into `emission_vault` PDA (fits within `u64`).
+- Emission vault account stores: `bump`, `last_distribution_ts`, `weekly_amount` (`1,000,000,000 * 10^9`).
+- Weekly distribution (permissionless trigger):
+  - Requires ≥7 days since `last_distribution_ts` (Clock sysvar).
+  - 60% to `lm_vault` PDA (`["lm_vault"]`).
+  - 40% to `team_vault` PDA (`["team_vault"]`).
+  - Emits `WeeklyDistribution { week, liquidity, team }`.
+- Initialization: only admin wallet `EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof` can call `initialize_emission_vault` (one-time).
+- `team_vault` withdrawal is intentionally locked for now (future 4-of-7 multisig).
 - [Frontend Guide](../aegis-frontend/README.md) - UI devnet dashboard
+
+---
+
+## 💡 Principais Melhorias Implementadas
+
+### 🏗️ Arquitetura Simplificada
+- **Código mais legível e mantível**: Refatoração completa do programa Anchor
+- **Separação de Responsabilidades**: Cada módulo tem propósito claro
+- **Estrutura Modular**: Program, SDK, e Frontend bem organizados
+
+### 🔧 Type Safety Completo
+- **TypeScript em todo o frontend**: Next.js 14 com tipagem rigorosa
+- **SDK Type-Safe**: Interfaces bem definidas para todas as operações
+- **Validação em Tempo de Compilação**: Menos bugs em produção
+
+### 🎨 Modern Stack Tecnológico
+- **Next.js 14 + React 18**: Framework mais recente para melhor performance
+- **Tailwind CSS**: Sistema de design consistente e responsivo
+- **Anchor 0.32.0**: Versão estável do framework Solana
+
+### 🔗 Wallet Integration Completa
+- **Suporte completo a carteiras Solana**: Phantom, Solflare, Backpack
+- **Conexão automática**: Detecção e reconexão automática
+- **Feedback visual**: Estados de loading e erro bem definidos
+
+### 🧪 Testes Abrangentes
+- **Testes de unidade**: Cobertura completa do programa
+- **Testes de integração**: Frontend + SDK funcionando
+- **Testes E2E**: Fluxo completo usuário validado
+
+### 📚 Documentação Técnica
+- **Guias detalhados**: Como usar, integrar e contribuir
+- **Exemplos práticos**: Code snippets funcionais
+- **API Reference**: Documentação completa do SDK
+
+### 🚀 Deploy e CI/CD
+- **Scripts de deploy automatizados**: Para devnet e mainnet
+- **Configurações de ambiente**: Separação clara entre ambientes
+- **Build otimizado**: Binários menores e mais eficientes
+
+### 🔒 Segurança Aprimorada
+- **Auditoria de código**: Revisão completa de vulnerabilidades
+- **Validações robustas**: Checks em todas as operações críticas
+- **Error handling**: Tratamento adequado de erros edge cases
 
 ---
 

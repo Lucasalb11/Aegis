@@ -3,7 +3,7 @@ seeds = true
 skip-lint = false
 
 [toolchain]
-anchor_version = "0.32.0"
+anchor_version = "0.31.0"
 
 [programs.localnet]
 aegis_protocol = "AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu"

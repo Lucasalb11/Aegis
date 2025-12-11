@@ -79,3 +79,19 @@ pub fn team_vault_seeds(bump: u8) -> (u8, Vec<Vec<u8>>) {
     ];
     (bump, seeds)
 }
+
+pub fn ecosystem_vault_seeds(bump: u8) -> (u8, Vec<Vec<u8>>) {
+    let seeds = vec![
+        b"ecosystem_vault".to_vec(),
+        vec![bump],
+    ];
+    (bump, seeds)
+}
+
+pub fn team_vesting_seeds(bump: u8) -> (u8, Vec<Vec<u8>>) {
+    let seeds = vec![
+        b"team_vesting".to_vec(),
+        vec![bump],
+    ];
+    (bump, seeds)
+}

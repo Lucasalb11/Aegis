@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{system_program, system_instruction};
+use anchor_lang::solana_program::system_instruction;
 use crate::state::*;
 
 /// Instruction: Deposit SOL into the vault

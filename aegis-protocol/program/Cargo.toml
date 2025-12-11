@@ -15,16 +15,20 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 default = []
+anchor-debug = []
+custom-heap = []
+custom-panic = []
 
 [profile.release]
-overflow-checks = false
-lto = false
+overflow-checks = true
+lto = true
 codegen-units = 1
 opt-level = 3
+panic = "abort"
 
 [dependencies]
-anchor-lang = "0.32.0"
-anchor-spl = "0.32.0"
+anchor-lang = "0.31.0"
+anchor-spl = "0.31.0"
 getrandom = { version = "0.2", features = ["custom"] }
 
 [dev-dependencies]

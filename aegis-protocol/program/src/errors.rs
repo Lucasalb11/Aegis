@@ -82,4 +82,28 @@ pub enum ErrorCode {
 
     #[msg("Below threshold")]
     BelowThreshold,
+
+    #[msg("Total supply exceeds SPL token limit")]
+    SupplyTooLarge,
+
+    #[msg("Emission schedule already completed")]
+    EmissionCompleted,
+
+    #[msg("Destination token account mint mismatch")]
+    InvalidDestinationMint,
+
+    #[msg("Invalid mint authority")]
+    InvalidMintAuthority,
+
+    #[msg("No reward points available for claim")]
+    NoRewardPoints,
+
+    #[msg("Pool not eligible for boosted rewards")]
+    PoolNotEligible,
+
+    #[msg("Not enough tokens in emission vault")]
+    EmissionInsufficientBalance,
+
+    #[msg("Reentrancy detected")]
+    ReentrancyDetected,
 }

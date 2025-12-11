@@ -38,8 +38,7 @@ pub struct InitializeEmissionVault<'info> {
         init,
         payer = admin,
         mint::decimals = AEGIS_DECIMALS,
-        mint::authority = reward_minter,
-        mint::freeze_authority = None
+        mint::authority = reward_minter
     )]
     pub aegis_mint: Account<'info, Mint>,
     #[account(
@@ -118,6 +117,7 @@ pub struct DistributeWeeklyRewards<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[inline(never)]
 pub fn initialize_emission_vault(ctx: Context<InitializeEmissionVault>) -> Result<()> {
     // Ensure one-time initialization
     require!(
@@ -152,37 +152,79 @@ pub fn initialize_emission_vault(ctx: Context<InitializeEmissionVault>) -> Resul
     Ok(())
 }
 
+#[inline(never)]
 pub fn distribute_weekly_rewards(ctx: Context<DistributeWeeklyRewards>) -> Result<()> {
     let clock = Clock::get()?;
     let now_ts: u64 = clock.unix_timestamp.try_into().map_err(|_| error!(ErrorCode::ArithmeticOverflow))?;
 
     let emission_vault = &mut ctx.accounts.emission_vault;
+
+    // Early validation
     let last = emission_vault.last_distribution_ts;
     if last != 0 {
         let elapsed = now_ts.checked_sub(last).ok_or(error!(ErrorCode::ArithmeticOverflow))?;
         require!((elapsed as i64) >= WEEK_IN_SECONDS, ErrorCode::CooldownNotElapsed);
     }
 
-    let weekly = emission_vault.weekly_amount;
-    let liquidity_amount = weekly
+    // Calculate distribution amounts using helper function
+    let (liquidity_amount, team_amount) = calculate_distribution_amounts(emission_vault.weekly_amount)?;
+
+    // Validate balance
+    let total = liquidity_amount
+        .checked_add(team_amount)
+        .ok_or(error!(ErrorCode::ArithmeticOverflow))?;
+    require!(ctx.accounts.emission_token_account.amount >= total, ErrorCode::InsufficientBalance);
+
+    // Perform transfers
+    transfer_distribution(&ctx, liquidity_amount, team_amount)?;
+
+    // Update state
+    emission_vault.last_distribution_ts = now_ts;
+
+    // Calculate week number
+    let week_number = calculate_week_number(last)?;
+
+    emit!(WeeklyDistribution {
+        week: week_number,
+        liquidity: liquidity_amount,
+        team: team_amount,
+    });
+
+    Ok(())
+}
+
+#[inline(never)]
+fn calculate_distribution_amounts(weekly_amount: u64) -> Result<(u64, u64)> {
+    let liquidity_amount = weekly_amount
         .checked_mul(60)
         .ok_or(error!(ErrorCode::ArithmeticOverflow))?
         .checked_div(100)
         .ok_or(error!(ErrorCode::ArithmeticOverflow))?;
-    let team_amount = weekly
+
+    let team_amount = weekly_amount
         .checked_mul(40)
         .ok_or(error!(ErrorCode::ArithmeticOverflow))?
         .checked_div(100)
         .ok_or(error!(ErrorCode::ArithmeticOverflow))?;
-    let total = liquidity_amount
-        .checked_add(team_amount)
-        .ok_or(error!(ErrorCode::ArithmeticOverflow))?;
 
-    require!(ctx.accounts.emission_token_account.amount >= total, ErrorCode::InsufficientBalance);
+    Ok((liquidity_amount, team_amount))
+}
 
+#[inline(never)]
+fn transfer_distribution(
+    ctx: &Context<DistributeWeeklyRewards>,
+    liquidity_amount: u64,
+    team_amount: u64,
+) -> Result<()> {
+    let emission_vault = &ctx.accounts.emission_vault;
     let emission_bump = emission_vault.bump;
     let (_ev_bump, emission_signer) = seeds::emission_vault_seeds(emission_bump);
-    let emission_signer_seeds: Vec<&[u8]> = emission_signer.iter().map(|s| s.as_slice()).collect();
+
+    // Use Vec::with_capacity instead of collecting into Vec
+    let mut emission_signer_seeds = Vec::with_capacity(emission_signer.len());
+    for s in emission_signer.iter() {
+        emission_signer_seeds.push(s.as_slice());
+    }
 
     token::transfer(
         CpiContext::new_with_signer(
@@ -210,12 +252,16 @@ pub fn distribute_weekly_rewards(ctx: Context<DistributeWeeklyRewards>) -> Resul
         team_amount,
     )?;
 
-    emission_vault.last_distribution_ts = now_ts;
+    Ok(())
+}
 
-    let week_number: u32 = if last == 0 {
+#[inline(never)]
+fn calculate_week_number(last_distribution_ts: u64) -> Result<u32> {
+    let week_number: u32 = if last_distribution_ts == 0 {
         1
     } else {
-        last.checked_div(WEEK_IN_SECONDS as u64)
+        last_distribution_ts
+            .checked_div(WEEK_IN_SECONDS as u64)
             .ok_or(error!(ErrorCode::ArithmeticOverflow))?
             .checked_add(1)
             .ok_or(error!(ErrorCode::ArithmeticOverflow))?
@@ -223,11 +269,5 @@ pub fn distribute_weekly_rewards(ctx: Context<DistributeWeeklyRewards>) -> Resul
             .map_err(|_| error!(ErrorCode::ArithmeticOverflow))?
     };
 
-    emit!(WeeklyDistribution {
-        week: week_number,
-        liquidity: liquidity_amount,
-        team: team_amount,
-    });
-
-    Ok(())
+    Ok(week_number)
 }

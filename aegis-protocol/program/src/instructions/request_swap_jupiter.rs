@@ -41,20 +41,8 @@ pub struct RequestSwapJupiter<'info> {
     /// Optional: PendingAction PDA for large transactions
     /// Only initialized if amount exceeds threshold
     /// Seeds ensure uniqueness per vault and action count
-    #[account(
-        init,
-        payer = authority,
-        space = PendingAction::SIZE,
-        seeds = [
-            b"pending_action", 
-            vault.key().as_ref(), 
-            &vault.pending_actions_count.to_le_bytes()
-        ],
-        bump,
-        // Only create this account if we're above threshold
-        constraint = amount_in_lamports > policy.large_tx_threshold_lamports @ crate::ErrorCode::BelowThreshold
-    )]
-    pub pending_action: Option<Account<'info, PendingAction>>,
+    #[account(mut)]
+    pub pending_action: Account<'info, PendingAction>,
     
     /// System program for PDA creation (if needed)
     pub system_program: Program<'info, System>,
@@ -70,8 +58,8 @@ pub fn request_swap_jupiter(
     ctx: Context<RequestSwapJupiter>,
     amount_in_lamports: u64,
     amount_out_lamports: u64,
-    jupiter_accounts: Vec<u8>,
-    jupiter_data: Vec<u8>,
+    _jupiter_accounts: Vec<u8>,
+    _jupiter_data: Vec<u8>,
 ) -> Result<()> {
     require!(amount_in_lamports > 0, crate::ErrorCode::InvalidAmount);
     require!(amount_out_lamports > 0, crate::ErrorCode::InvalidAmount);
@@ -102,10 +90,8 @@ pub fn request_swap_jupiter(
         msg!("Large transaction detected - creating pending action");
         
         // This should only happen if pending_action was created
-        let pending_action = ctx.accounts.pending_action.as_ref().unwrap();
-
-        // Initialize the pending action
-        let pending_action_account = ctx.accounts.pending_action.as_mut().unwrap();
+        // Initialize the pending action (must be provided by caller)
+        let pending_action_account = &mut ctx.accounts.pending_action;
         pending_action_account.vault = vault.key();
         pending_action_account.action_type = ActionType::Swap;
         pending_action_account.amount_lamports = amount_in_lamports;
@@ -122,7 +108,7 @@ pub fn request_swap_jupiter(
         pending_action_account.status = ActionStatus::Pending;
         pending_action_account.approver = None;
         pending_action_account.processed_at = None;
-        pending_action_account.bump = ctx.bumps.pending_action.unwrap();
+        pending_action_account.bump = 0;
         pending_action_account._reserved = [0; 7];
         
         // Update vault pending actions count

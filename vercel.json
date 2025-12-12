@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "cd ../aegis-protocol/sdk && npm install && npm run build && cd ../../aegis-frontend && npm install",
+  "installCommand": "cd ../aegis-protocol/sdk && NODE_ENV=development npm install && npm run build && cd ../../aegis-frontend && npm install",
   "outputDirectory": ".next"
 }

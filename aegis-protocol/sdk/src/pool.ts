@@ -142,8 +142,8 @@ export class Pool {
   ): Promise<TransactionInstruction> {
     const data = Buffer.alloc(17);
     data.writeUInt8(1, 0); // instruction discriminator for add_liquidity
-    params.amountA.toArray().forEach((byte, i) => data.writeUInt8(byte, i + 1));
-    params.amountB.toArray().forEach((byte, i) => data.writeUInt8(byte, i + 9));
+    params.amountA.toArray().forEach((byte: number, i: number) => data.writeUInt8(byte, i + 1));
+    params.amountB.toArray().forEach((byte: number, i: number) => data.writeUInt8(byte, i + 9));
 
     return new TransactionInstruction({
       keys: [
@@ -182,8 +182,8 @@ export class Pool {
   ): Promise<TransactionInstruction> {
     const data = Buffer.alloc(18);
     data.writeUInt8(2, 0); // instruction discriminator for swap
-    params.amountIn.toArray().forEach((byte, i) => data.writeUInt8(byte, i + 1));
-    params.minAmountOut.toArray().forEach((byte, i) => data.writeUInt8(byte, i + 9));
+    params.amountIn.toArray().forEach((byte: number, i: number) => data.writeUInt8(byte, i + 1));
+    params.minAmountOut.toArray().forEach((byte: number, i: number) => data.writeUInt8(byte, i + 9));
     data.writeUInt8(params.aToB ? 1 : 0, 17);
 
     // Determine source and destination mints based on swap direction

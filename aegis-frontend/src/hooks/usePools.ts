@@ -35,46 +35,80 @@ export function usePools(programId?: PublicKey) {
     setError(null);
 
     try {
-      // Buscar todas as contas de pool
+      // Return mock pools with correct PDAs and token addresses
+      const mockPoolInfos: PoolInfo[] = [
+        {
+          publicKey: new PublicKey("E7haxmME6WR1Eu77dvyftMcDE9Dc81MbmF5RNU8NGdtt"), // AEGIS-AUSD pool PDA
+          mintA: new PublicKey("GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9"), // AEGIS
+          mintB: new PublicKey("D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys"), // AUSD
+          vaultA: new PublicKey("J7FKr1XdX7oPFZ57A4YJCdb4e1k7MpJgvktSEQWMeSmZ"),
+          vaultB: new PublicKey("HprTYoBPJsQtq2yCNZWEYMUkjVvALdoKbhHZZ1j8NZVr"),
+          lpMint: new PublicKey("CT9ATmXV3jVPVocdZZfGkEsmsBCMSnghgWKwPeueVXg9"),
+          feeBps: 30,
+          lpSupply: 1000000,
+          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
+        },
+        {
+          publicKey: new PublicKey("GE2eXgFpPW5p9FZkqdjyrcxJd5sGBxCiEM6LHUFEutyJ"), // AERO-AUSD pool PDA
+          mintA: new PublicKey("DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3"), // AERO
+          mintB: new PublicKey("D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys"), // AUSD
+          vaultA: new PublicKey("GpgSbSyaUqt5cPLuxQcV4UKrn5pGxuyfcX4MCP2knUbc"),
+          vaultB: new PublicKey("2jDkhqLxGXza6uiDowzxM88bN8vi34bhYXjd1om91out"),
+          lpMint: new PublicKey("8Z1jSFfrwgcmhpzbqTkCEtBa2AVtabVXU1hEn93FaJJa"),
+          feeBps: 20,
+          lpSupply: 1000000,
+          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
+        },
+        {
+          publicKey: new PublicKey("D6w1vufUGfs2YAZ9xRGrMmEZuhyKp5eedpCc1sUFXbr4"), // ABTC-AUSD pool PDA
+          mintA: new PublicKey("3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc"), // ABTC
+          mintB: new PublicKey("D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys"), // AUSD
+          vaultA: new PublicKey("J95rEurcVaid9qzWhy8yJDcMfmTm4HQDCxRFAu9idV2P"),
+          vaultB: new PublicKey("FKnfQbW379vJ6PR7k7BMfpfDnTHV5Gj8En2KhcvJ5qgi"),
+          lpMint: new PublicKey("G9veKwAPyS6GwrXASbMFkPnkXGfmECbuj3cSWmRR8jLf"),
+          feeBps: 25,
+          lpSupply: 1000000,
+          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
+        },
+        {
+          publicKey: new PublicKey("FcwzNJ5GQjZPQ9vZXq1rTMx8Z48RaPHbgZ2oPn3a8hyZ"), // AEGIS-ASOL pool PDA
+          mintA: new PublicKey("GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9"), // AEGIS
+          mintB: new PublicKey("7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15"), // ASOL
+          vaultA: new PublicKey("6D1nvhDJiswAFNGGtkahyDLmCQEqBiPYvGbZ65asz7zi"),
+          vaultB: new PublicKey("BfA2EHvggDyxVnSkZHjwdUsmQeo4yTL4TpEQt1tTjtvY"),
+          lpMint: new PublicKey("CCn6T5btgHMsoCkYUvE7emAjq6Qk4Urve1vVLEghXkZt"),
+          feeBps: 35,
+          lpSupply: 1000000,
+          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
+        },
+        {
+          publicKey: new PublicKey("ABtWdKx71ghcrJPHdJYdmVu49pU4DFUMM5GVvfUudH1E"), // ABTC-ASOL pool PDA
+          mintA: new PublicKey("3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc"), // ABTC
+          mintB: new PublicKey("7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15"), // ASOL
+          vaultA: new PublicKey("74SVR51pVG88B2FjecodKSBASpt3UnC5x5oqEF4Sk4gP"),
+          vaultB: new PublicKey("H4Hzn5dbbgP7AvXEsn7kebTuHmyAGSP1FegWpmWBtBQB"),
+          lpMint: new PublicKey("5UnK54hfqXL8LsnExcqCgQDHE3x2xY3BLTNVBbSMd5Q9"),
+          feeBps: 40,
+          lpSupply: 1000000,
+          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
+        },
+      ];
+
+      setPools(mockPoolInfos);
+
+      // Uncomment when real pools are deployed:
+      /*
       const accounts = await connection.getProgramAccounts(programId, {
-        filters: [
-          {
-            dataSize: 8 + 32 + 32 + 32 + 32 + 32 + 2 + 8 + 32 + 1 + 1 + 1 + 1 + 5, // Pool::SIZE
-          },
-        ],
+        filters: [{ dataSize: 219 }],
       });
 
       const poolInfos: PoolInfo[] = [];
-
       for (const account of accounts) {
-        try {
-          // Parse pool account data
-          const data = account.account.data;
-          const pool: PoolInfo = {
-            publicKey: account.pubkey,
-            mintA: new PublicKey(data.slice(8, 40)),
-            mintB: new PublicKey(data.slice(40, 72)),
-            vaultA: new PublicKey(data.slice(72, 104)),
-            vaultB: new PublicKey(data.slice(104, 136)),
-            lpMint: new PublicKey(data.slice(136, 168)),
-            feeBps: data.readUInt16LE(168),
-            lpSupply: Number(data.readBigUInt64LE(170)),
-            creator: new PublicKey(data.slice(178, 210)),
-          };
-
-          // Verificar se tem liquidez
-          const vaultABalance = await connection.getTokenAccountBalance(pool.vaultA);
-          const vaultBBalance = await connection.getTokenAccountBalance(pool.vaultB);
-
-          if (vaultABalance.value.uiAmount && vaultBBalance.value.uiAmount) {
-            poolInfos.push(pool);
-          }
-        } catch (err) {
-          console.warn('Failed to parse pool account:', account.pubkey.toString(), err);
-        }
+        // Parse real pool data here
       }
-
       setPools(poolInfos);
+      */
+
     } catch (err: any) {
       console.error('Failed to fetch pools:', err);
       setError(err.message || 'Failed to fetch pools');
@@ -146,8 +180,14 @@ export function usePools(programId?: PublicKey) {
 function getTokenSymbol(mint: PublicKey): string {
   const mintStr = mint.toString();
 
-  // Tokens comuns na devnet
+  // Tokens do Aegis Protocol na devnet
   const tokenMap: Record<string, string> = {
+    'GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9': 'AEGIS',
+    'DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3': 'AERO',
+    '3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc': 'ABTC',
+    'D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys': 'AUSD',
+    '7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15': 'ASOL',
+    // Tokens comuns na devnet
     'So11111111111111111111111111111112': 'SOL',
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
@@ -163,6 +203,12 @@ function getTokenName(mint: PublicKey): string {
   const mintStr = mint.toString();
 
   const tokenMap: Record<string, string> = {
+    'GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9': 'Aegis Token',
+    'DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3': 'Aero Token',
+    '3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc': 'Aegis Bitcoin',
+    'D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys': 'Aegis USD',
+    '7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15': 'Aegis SOL',
+    // Tokens comuns na devnet
     'So11111111111111111111111111111112': 'Solana',
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USD Coin',
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'Tether USD',

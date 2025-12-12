@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Pool } from "@/src/types/pool";
 import { TopNav } from "@/components/TopNav";
 import { useAprManager } from "@/src/hooks/useAprManager";
+import { AddLiquidityModal } from "./AddLiquidityModal";
+import { RemoveLiquidityModal } from "./RemoveLiquidityModal";
 
 function formatUsd(value: number, opts?: Intl.NumberFormatOptions) {
   return `$${value.toLocaleString(undefined, { maximumFractionDigits: 2, ...opts })}`;
@@ -17,6 +19,9 @@ export default function PoolDetailClient({ pool }: { pool: Pool }) {
   const differencePct = (difference / managedPool.ilComparison.hodl) * 100;
 
   const historyTabs = useMemo(() => managedPool.history ?? [], [managedPool.history]);
+
+  const [showAddLiquidity, setShowAddLiquidity] = useState(false);
+  const [showRemoveLiquidity, setShowRemoveLiquidity] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -51,10 +56,16 @@ export default function PoolDetailClient({ pool }: { pool: Pool }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="h-11 px-6 rounded-lg bg-primary/20 text-primary text-sm font-bold tracking-wide hover:bg-primary/30 transition-colors">
+            <button
+              onClick={() => setShowRemoveLiquidity(true)}
+              className="h-11 px-6 rounded-lg bg-primary/20 text-primary text-sm font-bold tracking-wide hover:bg-primary/30 transition-colors"
+            >
               Remove
             </button>
-            <button className="h-11 px-6 rounded-lg bg-primary text-white text-sm font-bold tracking-wide hover:bg-primary/90 transition-colors">
+            <button
+              onClick={() => setShowAddLiquidity(true)}
+              className="h-11 px-6 rounded-lg bg-primary text-white text-sm font-bold tracking-wide hover:bg-primary/90 transition-colors"
+            >
               Add Liquidity
             </button>
           </div>
@@ -148,6 +159,20 @@ export default function PoolDetailClient({ pool }: { pool: Pool }) {
           </div>
         </div>
       </main>
+
+      {showAddLiquidity && (
+        <AddLiquidityModal
+          pool={managedPool}
+          onClose={() => setShowAddLiquidity(false)}
+        />
+      )}
+
+      {showRemoveLiquidity && (
+        <RemoveLiquidityModal
+          pool={managedPool}
+          onClose={() => setShowRemoveLiquidity(false)}
+        />
+      )}
     </div>
   );
 }

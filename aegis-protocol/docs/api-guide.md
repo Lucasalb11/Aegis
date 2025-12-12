@@ -360,3 +360,4 @@ class PoolMonitor {
 Para dúvidas específicas, consulte a [documentação completa do SDK](./sdk/README.md) ou abra uma issue no repositório.
 
 
+

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { WalletProviders } from "@/src/providers/WalletProviders";
-import { AegisProvider } from "@/src/providers/AegisProvider";
+import { ClientProviders } from "../src/providers/ClientProviders";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -17,9 +16,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} font-display bg-background-dark text-white`}>
-        <WalletProviders>
-          <AegisProvider programId={programId}>{children}</AegisProvider>
-        </WalletProviders>
+        <ClientProviders programId={programId}>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

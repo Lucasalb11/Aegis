@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "name": "aegis_protocol",
-  "address": "AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu",
+  "address": "FqGarB7xanZe2PWXxsFdxMgkYF1kR4q6E1VSSWsTgBc9",
   "instructions": [
     {
       "name": "initializeVault",
@@ -450,7 +450,7 @@
     { "code": 6040, "name": "InvalidTokenProgram", "msg": "Invalid token program provided" }
   ],
   "metadata": {
-    "address": "AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu",
+    "address": "FqGarB7xanZe2PWXxsFdxMgkYF1kR4q6E1VSSWsTgBc9",
     "origin": "anchor",
     "binaryVersion": "0.32.0",
     "libVersion": "0.32.0",

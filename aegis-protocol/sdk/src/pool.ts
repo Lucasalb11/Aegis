@@ -55,6 +55,7 @@ export class Pool {
     const transaction = new Transaction().add(instruction);
 
     if (payer) {
+      transaction.feePayer = payer.publicKey;
       await sendAndConfirmTransaction(aegis.connection, transaction, [payer]);
     } else {
       await aegis.sendTransaction(transaction);
@@ -165,20 +166,13 @@ export class Pool {
     params: SwapParams,
     userSource: PublicKey,
     userDestination: PublicKey
-  ): Promise<SwapResult> {
+  ): Promise<string> {
     const instruction = await this.createSwapInstruction(params, userSource, userDestination);
 
     const transaction = new Transaction().add(instruction);
-    await this.aegis.sendTransaction(transaction);
+    const signature = await this.aegis.sendTransaction(transaction);
 
-    // Calculate result (simplified)
-    const amountOut = new BN(0); // Would be calculated from swap logic
-    const fee = new BN(0); // Would be calculated from fee logic
-
-    return {
-      amountOut,
-      fee,
-    };
+    return signature;
   }
 
   private async createSwapInstruction(
@@ -192,14 +186,20 @@ export class Pool {
     params.minAmountOut.toArray().forEach((byte, i) => data.writeUInt8(byte, i + 9));
     data.writeUInt8(params.aToB ? 1 : 0, 17);
 
+    // Determine source and destination mints based on swap direction
+    const sourceMint = params.aToB ? this.info.mintA : this.info.mintB;
+    const destinationMint = params.aToB ? this.info.mintB : this.info.mintA;
+
     return new TransactionInstruction({
       keys: [
         { pubkey: this.aegis.wallet.publicKey, isSigner: true, isWritable: false },
-        { pubkey: this.info.address, isSigner: false, isWritable: false },
+        { pubkey: this.info.address, isSigner: false, isWritable: true },
         { pubkey: this.info.vaultA, isSigner: false, isWritable: true },
         { pubkey: this.info.vaultB, isSigner: false, isWritable: true },
         { pubkey: userSource, isSigner: false, isWritable: true },
         { pubkey: userDestination, isSigner: false, isWritable: true },
+        { pubkey: sourceMint, isSigner: false, isWritable: false },
+        { pubkey: destinationMint, isSigner: false, isWritable: false },
         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       ],
       programId: this.aegis.programId,
@@ -212,3 +212,4 @@ export class Pool {
     // For now, this is a placeholder
   }
 }
+

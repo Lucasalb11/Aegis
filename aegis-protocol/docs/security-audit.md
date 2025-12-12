@@ -211,3 +211,5 @@ Para questões de segurança:
 **Auditoria realizada por**: Equipe Interna Aegis Protocol
 **Data**: Dezembro 2025
 **Versão Auditada**: v1.0.0
+
+

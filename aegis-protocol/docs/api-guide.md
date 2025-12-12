@@ -358,3 +358,5 @@ class PoolMonitor {
 - [Suporte Discord](https://discord.gg/aegis)
 
 Para dúvidas específicas, consulte a [documentação completa do SDK](./sdk/README.md) ou abra uma issue no repositório.
+
+

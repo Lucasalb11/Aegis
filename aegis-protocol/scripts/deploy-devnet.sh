@@ -134,3 +134,5 @@ echo "  3. Monitor program logs: solana logs $PROGRAM_ID"
 echo ""
 
 exit 0
+
+

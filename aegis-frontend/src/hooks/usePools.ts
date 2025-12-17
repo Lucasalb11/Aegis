@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { PublicKey, Connection } from '@solana/web3.js';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { AegisClient } from '@aegis/sdk';
-import BN from 'bn.js';
+import { BN } from '@solana/web3.js';
 
 export interface PoolInfo {
   publicKey: PublicKey;

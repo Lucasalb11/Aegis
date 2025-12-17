@@ -15,7 +15,7 @@ export function PoolStats({ pools }: PoolStatsProps) {
     const totalPools = pools.length;
     const totalLiquidity = pools.reduce((sum, pool) => {
       // Simplificação: assumir valores aproximados
-      return sum + (pool.lpSupply / 1_000_000); // Converter para unidades legíveis
+      return sum + (pool.lpSupply.toNumber() / 1_000_000); // Converter para unidades legíveis
     }, 0);
 
     const uniqueTokens = new Set<string>();

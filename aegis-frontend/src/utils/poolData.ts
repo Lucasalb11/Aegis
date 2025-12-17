@@ -4,7 +4,7 @@
 
 import { Connection, PublicKey } from '@solana/web3.js';
 import { getAccount, getMint, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { BN } from '@solana/web3.js';
+import BN from 'bn.js';
 import { PoolInfo } from '@/src/hooks/usePools';
 
 // Token metadata cache

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { PublicKey, Connection } from '@solana/web3.js';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { AegisClient } from '@aegis/sdk';
+import BN from 'bn.js';
 
 export interface PoolInfo {
   publicKey: PublicKey;
@@ -11,7 +12,7 @@ export interface PoolInfo {
   vaultB: PublicKey;
   lpMint: PublicKey;
   feeBps: number;
-  lpSupply: number;
+  lpSupply: BN;
   creator: PublicKey;
 }
 
@@ -22,100 +23,98 @@ export interface TokenInfo {
   decimals: number;
 }
 
+// Pool discriminator for Aegis Protocol
+const POOL_DISCRIMINATOR = Buffer.from([241, 154, 109, 4, 17, 177, 109, 188]);
+const POOL_DATA_SIZE = 219;
+
 export function usePools(programId?: PublicKey) {
   const { connection } = useConnection();
   const [pools, setPools] = useState<PoolInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
-  const fetchPools = async () => {
+  const fetchPools = useCallback(async () => {
     if (!programId || !connection) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      // Return mock pools with correct PDAs and token addresses
-      const mockPoolInfos: PoolInfo[] = [
-        {
-          publicKey: new PublicKey("E7haxmME6WR1Eu77dvyftMcDE9Dc81MbmF5RNU8NGdtt"), // AEGIS-AUSD pool PDA
-          mintA: new PublicKey("GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9"), // AEGIS
-          mintB: new PublicKey("D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys"), // AUSD
-          vaultA: new PublicKey("J7FKr1XdX7oPFZ57A4YJCdb4e1k7MpJgvktSEQWMeSmZ"),
-          vaultB: new PublicKey("HprTYoBPJsQtq2yCNZWEYMUkjVvALdoKbhHZZ1j8NZVr"),
-          lpMint: new PublicKey("CT9ATmXV3jVPVocdZZfGkEsmsBCMSnghgWKwPeueVXg9"),
-          feeBps: 30,
-          lpSupply: 1000000,
-          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
-        },
-        {
-          publicKey: new PublicKey("GE2eXgFpPW5p9FZkqdjyrcxJd5sGBxCiEM6LHUFEutyJ"), // AERO-AUSD pool PDA
-          mintA: new PublicKey("DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3"), // AERO
-          mintB: new PublicKey("D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys"), // AUSD
-          vaultA: new PublicKey("GpgSbSyaUqt5cPLuxQcV4UKrn5pGxuyfcX4MCP2knUbc"),
-          vaultB: new PublicKey("2jDkhqLxGXza6uiDowzxM88bN8vi34bhYXjd1om91out"),
-          lpMint: new PublicKey("8Z1jSFfrwgcmhpzbqTkCEtBa2AVtabVXU1hEn93FaJJa"),
-          feeBps: 20,
-          lpSupply: 1000000,
-          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
-        },
-        {
-          publicKey: new PublicKey("D6w1vufUGfs2YAZ9xRGrMmEZuhyKp5eedpCc1sUFXbr4"), // ABTC-AUSD pool PDA
-          mintA: new PublicKey("3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc"), // ABTC
-          mintB: new PublicKey("D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys"), // AUSD
-          vaultA: new PublicKey("J95rEurcVaid9qzWhy8yJDcMfmTm4HQDCxRFAu9idV2P"),
-          vaultB: new PublicKey("FKnfQbW379vJ6PR7k7BMfpfDnTHV5Gj8En2KhcvJ5qgi"),
-          lpMint: new PublicKey("G9veKwAPyS6GwrXASbMFkPnkXGfmECbuj3cSWmRR8jLf"),
-          feeBps: 25,
-          lpSupply: 1000000,
-          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
-        },
-        {
-          publicKey: new PublicKey("FcwzNJ5GQjZPQ9vZXq1rTMx8Z48RaPHbgZ2oPn3a8hyZ"), // AEGIS-ASOL pool PDA
-          mintA: new PublicKey("GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9"), // AEGIS
-          mintB: new PublicKey("7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15"), // ASOL
-          vaultA: new PublicKey("6D1nvhDJiswAFNGGtkahyDLmCQEqBiPYvGbZ65asz7zi"),
-          vaultB: new PublicKey("BfA2EHvggDyxVnSkZHjwdUsmQeo4yTL4TpEQt1tTjtvY"),
-          lpMint: new PublicKey("CCn6T5btgHMsoCkYUvE7emAjq6Qk4Urve1vVLEghXkZt"),
-          feeBps: 35,
-          lpSupply: 1000000,
-          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
-        },
-        {
-          publicKey: new PublicKey("ABtWdKx71ghcrJPHdJYdmVu49pU4DFUMM5GVvfUudH1E"), // ABTC-ASOL pool PDA
-          mintA: new PublicKey("3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc"), // ABTC
-          mintB: new PublicKey("7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15"), // ASOL
-          vaultA: new PublicKey("74SVR51pVG88B2FjecodKSBASpt3UnC5x5oqEF4Sk4gP"),
-          vaultB: new PublicKey("H4Hzn5dbbgP7AvXEsn7kebTuHmyAGSP1FegWpmWBtBQB"),
-          lpMint: new PublicKey("5UnK54hfqXL8LsnExcqCgQDHE3x2xY3BLTNVBbSMd5Q9"),
-          feeBps: 40,
-          lpSupply: 1000000,
-          creator: new PublicKey("EQ5c3ZTo33GFpB2JjCqga3ecnbv9cbRpGqnSYu4Dmyof"),
-        },
-      ];
-
-      setPools(mockPoolInfos);
-
-      // Uncomment when real pools are deployed:
-      /*
+      // Fetch all pool accounts from the program
       const accounts = await connection.getProgramAccounts(programId, {
-        filters: [{ dataSize: 219 }],
+        filters: [
+          { dataSize: POOL_DATA_SIZE },
+        ],
+        commitment: 'confirmed',
       });
 
       const poolInfos: PoolInfo[] = [];
-      for (const account of accounts) {
-        // Parse real pool data here
-      }
-      setPools(poolInfos);
-      */
 
+      for (const account of accounts) {
+        try {
+          const data = account.account.data;
+
+          // Check discriminator
+          const discriminator = data.slice(0, 8);
+          if (!discriminator.equals(POOL_DISCRIMINATOR)) {
+            console.warn('Skipping account with invalid discriminator:', account.pubkey.toString());
+            continue;
+          }
+
+          // Parse pool data according to the program structure
+          const mintA = new PublicKey(data.slice(8, 40));
+          const mintB = new PublicKey(data.slice(40, 72));
+          const vaultA = new PublicKey(data.slice(72, 104));
+          const vaultB = new PublicKey(data.slice(104, 136));
+          const lpMint = new PublicKey(data.slice(136, 168));
+          const feeBps = data.readUInt16LE(168);
+          const lpSupply = new BN(data.readBigUInt64LE(170).toString());
+          const creator = new PublicKey(data.slice(178, 210));
+
+          poolInfos.push({
+            publicKey: account.pubkey,
+            mintA,
+            mintB,
+            vaultA,
+            vaultB,
+            lpMint,
+            feeBps,
+            lpSupply,
+            creator,
+          });
+        } catch (err) {
+          console.warn('Failed to parse pool account:', account.pubkey.toString(), err);
+        }
+      }
+
+      setPools(poolInfos);
+      setLastUpdate(new Date());
+      
+      if (poolInfos.length === 0) {
+        console.warn('No pools found on-chain. Make sure pools are initialized.');
+      }
     } catch (err: any) {
       console.error('Failed to fetch pools:', err);
       setError(err.message || 'Failed to fetch pools');
+      
+      // Fallback to empty array on error
+      setPools([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [programId, connection]);
+
+  useEffect(() => {
+    fetchPools();
+
+    // Set up auto-refresh every 10 seconds
+    const interval = setInterval(() => {
+      fetchPools();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [fetchPools]);
 
   useEffect(() => {
     fetchPools();
@@ -162,9 +161,9 @@ export function usePools(programId?: PublicKey) {
     ) || null;
   };
 
-  const refreshPools = () => {
+  const refreshPools = useCallback(() => {
     fetchPools();
-  };
+  }, [fetchPools]);
 
   return {
     pools,
@@ -173,6 +172,7 @@ export function usePools(programId?: PublicKey) {
     availableTokens: getAvailableTokens(),
     getPoolForTokens,
     refreshPools,
+    lastUpdate,
   };
 }
 

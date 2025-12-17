@@ -9,7 +9,11 @@
     "dev": "tsc --watch",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:comprehensive": "ts-node scripts/comprehensive-test.ts",
+    "test:fund-wallets": "ts-node scripts/fund-wallets.ts",
+    "test:create-pools": "ts-node scripts/test-create-pools.ts",
+    "test:sdk-pool": "ts-node scripts/test-sdk-create-pool.ts"
   },
   "keywords": ["solana", "blockchain", "defi", "amm", "typescript"],
   "author": "Aegis Protocol Team",
@@ -17,6 +21,7 @@
   "dependencies": {
     "@solana/web3.js": "^1.87.0",
     "@solana/spl-token": "^0.3.8",
+    "@coral-xyz/anchor": "^0.32.0",
     "bn.js": "^5.2.1",
     "@types/bn.js": "^5.1.1"
   },
@@ -25,7 +30,11 @@
     "@types/node": "^20.8.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.2.0"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.0",
+    "eslint": "^8.50.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0"
   },
   "peerDependencies": {
     "@solana/web3.js": "^1.87.0"

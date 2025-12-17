@@ -87,9 +87,15 @@ export class Pool {
     feeBps: number,
     payer: PublicKey
   ): Promise<TransactionInstruction> {
-    const data = Buffer.alloc(3);
-    data.writeUInt16LE(feeBps, 0);
-    data.writeUInt8(0, 2); // instruction discriminator for initialize_pool
+    // Discriminator correto do IDL para initializePool
+    const discriminator = Buffer.from([95, 180, 10, 172, 84, 174, 232, 40]);
+    
+    // Serializar o argumento feeBps (u16 em little-endian)
+    const feeBpsBuffer = Buffer.alloc(2);
+    feeBpsBuffer.writeUInt16LE(feeBps, 0);
+    
+    // Combinar discriminator + args
+    const data = Buffer.concat([discriminator, feeBpsBuffer]);
 
     return new TransactionInstruction({
       keys: [
@@ -140,14 +146,22 @@ export class Pool {
     userTokenB: PublicKey,
     userLpToken: PublicKey
   ): Promise<TransactionInstruction> {
-    const data = Buffer.alloc(17);
-    data.writeUInt8(1, 0); // instruction discriminator for add_liquidity
-    params.amountA.toArray().forEach((byte: number, i: number) => data.writeUInt8(byte, i + 1));
-    params.amountB.toArray().forEach((byte: number, i: number) => data.writeUInt8(byte, i + 9));
+    // Discriminator correto do IDL para addLiquidity
+    const discriminator = Buffer.from([181, 157, 89, 67, 143, 182, 52, 72]);
+    
+    // Serializar amount_a (u64) e amount_b (u64) em little-endian
+    const amountABuffer = Buffer.alloc(8);
+    amountABuffer.writeBigUInt64LE(BigInt(params.amountA.toString()));
+    
+    const amountBBuffer = Buffer.alloc(8);
+    amountBBuffer.writeBigUInt64LE(BigInt(params.amountB.toString()));
+    
+    // Combinar discriminator + args
+    const data = Buffer.concat([discriminator, amountABuffer, amountBBuffer]);
 
     return new TransactionInstruction({
       keys: [
-        { pubkey: this.aegis.wallet.publicKey, isSigner: true, isWritable: false },
+        { pubkey: this.aegis.wallet.publicKey, isSigner: true, isWritable: true },
         { pubkey: this.info.address, isSigner: false, isWritable: true },
         { pubkey: this.info.vaultA, isSigner: false, isWritable: true },
         { pubkey: this.info.vaultB, isSigner: false, isWritable: true },
@@ -180,11 +194,20 @@ export class Pool {
     userSource: PublicKey,
     userDestination: PublicKey
   ): Promise<TransactionInstruction> {
-    const data = Buffer.alloc(18);
-    data.writeUInt8(2, 0); // instruction discriminator for swap
-    params.amountIn.toArray().forEach((byte: number, i: number) => data.writeUInt8(byte, i + 1));
-    params.minAmountOut.toArray().forEach((byte: number, i: number) => data.writeUInt8(byte, i + 9));
-    data.writeUInt8(params.aToB ? 1 : 0, 17);
+    // Discriminator correto do IDL para swap
+    const discriminator = Buffer.from([248, 198, 158, 145, 225, 117, 135, 200]);
+    
+    // Serializar amount_in (u64), min_amount_out (u64), a_to_b (bool)
+    const amountInBuffer = Buffer.alloc(8);
+    amountInBuffer.writeBigUInt64LE(BigInt(params.amountIn.toString()));
+    
+    const minAmountOutBuffer = Buffer.alloc(8);
+    minAmountOutBuffer.writeBigUInt64LE(BigInt(params.minAmountOut.toString()));
+    
+    const aToB = Buffer.from([params.aToB ? 1 : 0]);
+    
+    // Combinar discriminator + args
+    const data = Buffer.concat([discriminator, amountInBuffer, minAmountOutBuffer, aToB]);
 
     // Determine source and destination mints based on swap direction
     const sourceMint = params.aToB ? this.info.mintA : this.info.mintB;
@@ -192,7 +215,7 @@ export class Pool {
 
     return new TransactionInstruction({
       keys: [
-        { pubkey: this.aegis.wallet.publicKey, isSigner: true, isWritable: false },
+        { pubkey: this.aegis.wallet.publicKey, isSigner: true, isWritable: true },
         { pubkey: this.info.address, isSigner: false, isWritable: true },
         { pubkey: this.info.vaultA, isSigner: false, isWritable: true },
         { pubkey: this.info.vaultB, isSigner: false, isWritable: true },

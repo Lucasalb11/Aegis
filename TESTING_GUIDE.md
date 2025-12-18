@@ -246,3 +246,4 @@ When you find a bug, document it with:
 - Devnet RPC: https://api.devnet.solana.com
 - Program ID: `AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu`
 - Faucet Wallet: `EwCiSnQEJTSZV4B9v4xRkJJFcDDFKA1i8NbyNAmXGm4z`
+

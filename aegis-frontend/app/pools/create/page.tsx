@@ -11,7 +11,7 @@ import { usePools, TokenInfo } from "@/src/hooks/usePools";
 // Common token mint addresses (as strings to avoid SSR issues)
 const COMMON_TOKEN_DATA = [
   {
-    mint: "So11111111111111111111111111111112",
+    mint: "So1111111111111111111111111111111112",
     symbol: "SOL",
     name: "Solana",
     decimals: 9,
@@ -51,11 +51,16 @@ export default function CreatePoolPage() {
 
   // Initialize common tokens on client side
   useEffect(() => {
-    const tokens = COMMON_TOKEN_DATA.map(data => ({
-      ...data,
-      mint: new PublicKey(data.mint),
-    }));
-    setCommonTokens(tokens);
+    try {
+      const tokens = COMMON_TOKEN_DATA.map(data => ({
+        ...data,
+        mint: new PublicKey(data.mint),
+      }));
+      setCommonTokens(tokens);
+    } catch (error) {
+      console.error('Error initializing common tokens:', error);
+      setCommonTokens([]);
+    }
   }, []);
 
   const allTokens = useMemo(() => [...commonTokens, ...availableTokens], [commonTokens, availableTokens]);
@@ -67,9 +72,29 @@ export default function CreatePoolPage() {
     setStatus("Preparando criação do pool...");
 
     try {
-      if (!canCreatePool) throw new Error("Conecte a Phantom e selecione tokens diferentes.");
-      if (!tokenA || !tokenB) throw new Error("Selecione ambos os tokens.");
-      if (tokenA.mint.equals(tokenB.mint)) throw new Error("Tokens devem ser diferentes.");
+      if (!connected) {
+        throw new Error("Conecte sua carteira para criar um pool.");
+      }
+      
+      if (!aegisClient) {
+        throw new Error("Cliente Aegis não inicializado. Verifique sua conexão.");
+      }
+
+      if (!programId) {
+        throw new Error("Program ID não configurado.");
+      }
+
+      if (!tokenA || !tokenB) {
+        throw new Error("Selecione ambos os tokens.");
+      }
+
+      if (tokenA.mint.equals(tokenB.mint)) {
+        throw new Error("Tokens devem ser diferentes.");
+      }
+
+      if (feeBps < 1 || feeBps > 1000) {
+        throw new Error("Taxa deve estar entre 1 e 1000 bps.");
+      }
 
       setStatus("Criando pool...");
 
@@ -78,12 +103,15 @@ export default function CreatePoolPage() {
 
       setStatus(`Pool criado com sucesso! Endereço: ${pool.info.address.toString()}`);
 
-      // Refresh pools list
-      refreshPools();
+      // Refresh pools list after a short delay to allow blockchain to update
+      setTimeout(() => {
+        refreshPools();
+      }, 2000);
 
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Erro ao criar pool");
+      console.error("Error creating pool:", err);
+      const errorMessage = err.message || err.toString() || "Erro ao criar pool";
+      setError(errorMessage);
       setStatus(null);
     }
   };

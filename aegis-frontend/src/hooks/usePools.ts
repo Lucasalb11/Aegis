@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { PublicKey, Connection } from '@solana/web3.js';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { AegisClient } from '@aegis/sdk';
+import { getMint } from '@solana/spl-token';
 import BN from 'bn.js';
 
 export interface PoolInfo {
@@ -33,6 +34,7 @@ export function usePools(programId?: PublicKey) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [tokenDecimals, setTokenDecimals] = useState<Map<string, number>>(new Map());
 
   const fetchPools = useCallback(async () => {
     if (!programId || !connection) return;
@@ -120,30 +122,81 @@ export function usePools(programId?: PublicKey) {
     fetchPools();
   }, [programId, connection]);
 
+  // Buscar decimais dos tokens conhecidos
+  useEffect(() => {
+    if (!connection) return;
+
+    const knownTokens = getKnownTokens();
+    const fetchDecimals = async () => {
+      const decimalsMap = new Map<string, number>();
+      
+      for (const token of knownTokens) {
+        try {
+          const mintInfo = await getMint(connection, token.mint);
+          decimalsMap.set(token.mint.toString(), mintInfo.decimals);
+        } catch (err) {
+          console.warn(`Failed to fetch decimals for ${token.mint.toString()}:`, err);
+          // Usar decimais padrão se falhar
+          decimalsMap.set(token.mint.toString(), token.decimals);
+        }
+      }
+      
+      setTokenDecimals(decimalsMap);
+    };
+
+    fetchDecimals();
+  }, [connection]);
+
   const getAvailableTokens = (): TokenInfo[] => {
     const tokenMap = new Map<string, TokenInfo>();
 
+    // Primeiro, adicionar tokens conhecidos (SOL + tokens mintados)
+    const knownTokens = getKnownTokens();
+    knownTokens.forEach(token => {
+      const mintKey = token.mint.toString();
+      const decimals = tokenDecimals.get(mintKey) ?? token.decimals;
+      tokenMap.set(mintKey, {
+        mint: token.mint,
+        symbol: token.symbol,
+        name: token.name,
+        decimals,
+      });
+    });
+
+    // Depois, adicionar tokens dos pools (pode sobrescrever se já existir)
     pools.forEach(pool => {
       // Token A
       const mintAKey = pool.mintA.toString();
       if (!tokenMap.has(mintAKey)) {
+        const decimals = tokenDecimals.get(mintAKey) ?? 6;
         tokenMap.set(mintAKey, {
           mint: pool.mintA,
           symbol: getTokenSymbol(pool.mintA),
           name: getTokenName(pool.mintA),
-          decimals: 6, // Default, será atualizado depois
+          decimals,
         });
+      } else {
+        // Atualizar decimais se já existe
+        const existing = tokenMap.get(mintAKey)!;
+        const decimals = tokenDecimals.get(mintAKey) ?? existing.decimals;
+        tokenMap.set(mintAKey, { ...existing, decimals });
       }
 
       // Token B
       const mintBKey = pool.mintB.toString();
       if (!tokenMap.has(mintBKey)) {
+        const decimals = tokenDecimals.get(mintBKey) ?? 6;
         tokenMap.set(mintBKey, {
           mint: pool.mintB,
           symbol: getTokenSymbol(pool.mintB),
           name: getTokenName(pool.mintB),
-          decimals: 6, // Default, será atualizado depois
+          decimals,
         });
+      } else {
+        // Atualizar decimais se já existe
+        const existing = tokenMap.get(mintBKey)!;
+        const decimals = tokenDecimals.get(mintBKey) ?? existing.decimals;
+        tokenMap.set(mintBKey, { ...existing, decimals });
       }
     });
 
@@ -176,6 +229,48 @@ export function usePools(programId?: PublicKey) {
   };
 }
 
+// Lista de tokens conhecidos (SOL + tokens mintados do Aegis Protocol)
+function getKnownTokens(): TokenInfo[] {
+  return [
+    {
+      mint: new PublicKey('So1111111111111111111111111111111112'), // Wrapped SOL (devnet/mainnet)
+      symbol: 'SOL',
+      name: 'Solana',
+      decimals: 9,
+    },
+    {
+      mint: new PublicKey('GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9'), // AEGIS
+      symbol: 'AEGIS',
+      name: 'Aegis Token',
+      decimals: 6,
+    },
+    {
+      mint: new PublicKey('DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3'), // AERO
+      symbol: 'AERO',
+      name: 'Aero Token',
+      decimals: 6,
+    },
+    {
+      mint: new PublicKey('3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc'), // ABTC
+      symbol: 'ABTC',
+      name: 'Aegis Bitcoin',
+      decimals: 6,
+    },
+    {
+      mint: new PublicKey('D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys'), // AUSD
+      symbol: 'AUSD',
+      name: 'Aegis USD',
+      decimals: 6,
+    },
+    {
+      mint: new PublicKey('7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15'), // ASOL
+      symbol: 'ASOL',
+      name: 'Aegis SOL',
+      decimals: 6,
+    },
+  ];
+}
+
 // Funções auxiliares para identificar tokens comuns
 function getTokenSymbol(mint: PublicKey): string {
   const mintStr = mint.toString();
@@ -188,7 +283,7 @@ function getTokenSymbol(mint: PublicKey): string {
     'D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys': 'AUSD',
     '7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15': 'ASOL',
     // Tokens comuns na devnet
-    'So11111111111111111111111111111112': 'SOL',
+    'So1111111111111111111111111111111112': 'SOL',
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
     '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs': 'ETH',
@@ -209,7 +304,7 @@ function getTokenName(mint: PublicKey): string {
     'D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys': 'Aegis USD',
     '7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15': 'Aegis SOL',
     // Tokens comuns na devnet
-    'So11111111111111111111111111111112': 'Solana',
+    'So1111111111111111111111111111111112': 'Solana',
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USD Coin',
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'Tether USD',
     '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs': 'Ethereum',

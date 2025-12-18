@@ -39,7 +39,7 @@ const TOKEN_METADATA: Record<string, { symbol: string; name: string; decimals: n
     decimals: 6,
     icon: 'https://assets.coingecko.com/coins/images/17752/small/mSOL.png?1696516777',
   },
-  'So11111111111111111111111111111112': {
+  'So1111111111111111111111111111111112': {
     symbol: 'SOL',
     name: 'Solana',
     decimals: 9,
@@ -54,7 +54,7 @@ const PRICE_CACHE: Record<string, number> = {
   '3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc': 30000.0, // ABTC
   'D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys': 1.0, // AUSD
   '7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15': 100.0, // ASOL
-  'So11111111111111111111111111111112': 100.0, // SOL
+  'So1111111111111111111111111111111112': 100.0, // SOL
 };
 
 export interface PoolMetrics {

@@ -2,7 +2,6 @@ import {
   Connection,
   PublicKey,
   Transaction,
-  sendAndConfirmTransaction,
   Signer,
   Keypair,
 } from '@solana/web3.js';
@@ -55,17 +54,27 @@ export class Aegis {
     transaction: Transaction,
     additionalSigners: Signer[] = []
   ): Promise<string> {
-    const { blockhash } = await this.connection.getRecentBlockhash();
+    const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash();
     transaction.recentBlockhash = blockhash;
     transaction.feePayer = this.wallet.publicKey;
 
     // Sign with wallet
     const signedTransaction = await this.wallet.signTransaction(transaction);
 
-    // Add additional signers if any
-    const allSigners = additionalSigners.length > 0 ? [signedTransaction, ...additionalSigners] : [signedTransaction];
+    // Send and confirm transaction
+    const signature = await this.connection.sendRawTransaction(signedTransaction.serialize(), {
+      skipPreflight: false,
+      maxRetries: 3,
+    });
 
-    return sendAndConfirmTransaction(this.connection, signedTransaction, additionalSigners);
+    // Wait for confirmation
+    await this.connection.confirmTransaction({
+      signature,
+      blockhash,
+      lastValidBlockHeight,
+    }, 'confirmed');
+
+    return signature;
   }
 
   async getPool(mintA: PublicKey, mintB: PublicKey): Promise<Pool | null> {

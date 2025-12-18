@@ -1,6 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "cd ../aegis-protocol/sdk && npm install && npm run build && cd ../../aegis-frontend && npm install",
-  "outputDirectory": ".next"
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "cd ../aegis-protocol/sdk && pnpm install && pnpm run build && cd ../../aegis-frontend && pnpm install",
+  "outputDirectory": ".next",
+  "rootDirectory": "aegis-frontend"
 }

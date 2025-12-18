@@ -39,7 +39,7 @@ export function useSwap(
     setError(null);
 
     try {
-      // Buscar saldos dos vaults
+      // Fetch vault balances
       const [vaultAInfo, vaultBInfo] = await Promise.all([
         connection.getTokenAccountBalance(pool.vaultA),
         connection.getTokenAccountBalance(pool.vaultB),
@@ -48,12 +48,12 @@ export function useSwap(
       const reserveA = new BN(vaultAInfo.value.amount);
       const reserveB = new BN(vaultBInfo.value.amount);
 
-      // Determinar se é A->B ou B->A
+      // Determine if it's A->B or B->A
       const aToB = fromToken.equals(pool.mintA);
 
       const [reserveIn, reserveOut] = aToB ? [reserveA, reserveB] : [reserveB, reserveA];
 
-      // Calcular amount out usando fórmula constant product
+      // Calculate amount out using constant product formula
       const amountInBN = new BN(Math.floor(Number(amountIn) * 10 ** 6)); // Assumindo 6 decimais
 
       if (amountInBN.gte(reserveIn)) {
@@ -80,11 +80,11 @@ export function useSwap(
       // Calcular fee
       const fee = amountInBN.sub(amountInAfterFee);
 
-      // Calcular slippage mínimo
+      // Calculate minimum slippage
       const slippageMultiplier = new BN(Math.floor((100 - slippage) * 100));
       const minAmountOut = amountOut.mul(slippageMultiplier).div(new BN(10000));
 
-      // Calcular price impact aproximado
+      // Calculate approximate price impact
       const priceImpact = amountInBN.mul(new BN(100)).div(reserveIn).toNumber() / 100;
 
       setQuote({

@@ -1,12 +1,12 @@
 #!/usr/bin/env ts-node
 /**
- * Script Otimizado para Máximo Aproveitamento de SOL Limitado
+ * Optimized Script for Maximum Utilization of Limited SOL
  * 
- * Estratégia:
- * 1. Verificar pools existentes e adicionar liquidez onde necessário
- * 2. Priorizar pools AEGIS/* (mais importantes)
- * 3. Usar SOL de forma eficiente (sem desperdício)
- * 4. Garantir que pools tenham liquidez mínima funcional
+ * Strategy:
+ * 1. Check existing pools and add liquidity where needed
+ * 2. Prioritize AEGIS/* pools (most important)
+ * 3. Use SOL efficiently (no waste)
+ * 4. Ensure pools have minimum functional liquidity
  */
 
 import {
@@ -201,7 +201,7 @@ async function main() {
   const treasuryWallet = new KeypairWallet(treasury);
   const aegis = new Aegis(connection, treasuryWallet, { programId });
 
-  // Filtrar apenas tokens AEGIS (não SOL, USDC)
+  // Filter only AEGIS tokens (not SOL, USDC)
   const aegisTokens = tokens.filter(t => 
     t.symbol !== 'SOL' && 
     t.symbol !== 'USDC' && 
@@ -210,16 +210,16 @@ async function main() {
 
   const aegisToken = aegisTokens.find(t => t.symbol === 'AEGIS');
   if (!aegisToken) {
-    console.log('❌ Token AEGIS não encontrado');
+    console.log('❌ AEGIS token not found');
     return;
   }
 
   const aegisMint = new PublicKey(aegisToken.mint);
   const otherTokens = aegisTokens.filter(t => t.symbol !== 'AEGIS');
 
-  console.log(`📋 Tokens disponíveis: ${aegisTokens.map(t => t.symbol).join(', ')}\n`);
+  console.log(`📋 Available tokens: ${aegisTokens.map(t => t.symbol).join(', ')}\n`);
 
-  // Prioridade: Pools AEGIS/* são mais importantes
+  // Priority: AEGIS/* pools are most important
   const priorityPairs: Array<[string, string]> = [
     ['AEGIS', 'AERO'],
     ['AEGIS', 'ABTC'],
@@ -294,7 +294,7 @@ async function main() {
         poolsCreated++;
         console.log(`    ✅ Pool criada: ${poolAddress.toString()}`);
         
-        // Tentar adicionar liquidez mínima
+        // Try to add minimum liquidity
         await new Promise(resolve => setTimeout(resolve, 1000));
         const liquidityAdded = await addLiquidityToPool(
           aegis,
@@ -306,15 +306,15 @@ async function main() {
         
         if (liquidityAdded) {
           poolsWithLiquidity++;
-          console.log(`    💧 Liquidez mínima adicionada`);
+          console.log(`    💧 Minimum liquidity added`);
         } else {
-          console.log(`    ⚠️  Sem tokens para liquidez (pool criada vazia)`);
+          console.log(`    ⚠️  No tokens for liquidity (pool created empty)`);
         }
       } catch (error: any) {
         console.error(`    ❌ Erro: ${error.message}`);
       }
     } else {
-      // Pool existe - verificar e adicionar liquidez se necessário
+      // Pool exists - check and add liquidity if needed
       try {
         const [poolAddress] = PublicKey.findProgramAddressSync(
           [Buffer.from('pool'), sortedMintA.toBuffer(), sortedMintB.toBuffer()],
@@ -335,10 +335,10 @@ async function main() {
 
         const liquidity = await getPoolLiquidity(connection, poolAddress, vaultA, vaultB);
         
-        console.log(`  ✅ Pool ${symbolA}/${symbolB} existe`);
-        console.log(`    Liquidez: ${liquidity.amountA.toString()} / ${liquidity.amountB.toString()}`);
+        console.log(`  ✅ Pool ${symbolA}/${symbolB} exists`);
+        console.log(`    Liquidity: ${liquidity.amountA.toString()} / ${liquidity.amountB.toString()}`);
 
-        // Se liquidez é muito baixa, tentar adicionar
+        // If liquidity is too low, try to add
         if (liquidity.amountA.lt(minLiquidity) || liquidity.amountB.lt(minLiquidity)) {
           const pool = new Pool(aegis, {
             address: poolAddress,
@@ -362,16 +362,16 @@ async function main() {
 
           if (liquidityAdded) {
             poolsWithLiquidity++;
-            console.log(`    💧 Liquidez adicionada`);
+            console.log(`    💧 Liquidity added`);
           } else {
-            console.log(`    ⚠️  Sem tokens para adicionar liquidez`);
+            console.log(`    ⚠️  No tokens to add liquidity`);
           }
         } else {
           poolsWithLiquidity++;
-          console.log(`    ✅ Liquidez suficiente`);
+          console.log(`    ✅ Sufficient liquidity`);
         }
 
-        // Adicionar ao output se não estiver lá
+        // Add to output if not already there
         const existsInOutput = poolsOutput.some(p => 
           p.poolAddress === poolAddress.toString()
         );
@@ -396,7 +396,7 @@ async function main() {
       }
     }
 
-    // Verificar saldo após cada operação
+    // Check balance after each operation
     const remainingBalance = await connection.getBalance(treasury.publicKey);
     if (remainingBalance < 0.001 * LAMPORTS_PER_SOL) {
       console.log('\n⚠️  SOL insuficiente para continuar');

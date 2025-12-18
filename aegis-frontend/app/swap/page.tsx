@@ -29,7 +29,7 @@ export default function SwapPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Calcular cotação do swap
+  // Calculate swap quote
   const { quote, loading: quoteLoading } = useSwap(
     fromToken?.mint || null,
     toToken?.mint || null,
@@ -39,7 +39,7 @@ export default function SwapPage() {
 
   const canSwap = connected && aegisClient && programId && fromToken && toToken && amount && quote;
 
-  // Verificar se o par de tokens tem um pool disponível
+  // Check if token pair has an available pool
   const hasPool = useMemo(() => {
     if (!fromToken || !toToken) return false;
     return getPoolForTokens(fromToken.mint, toToken.mint) !== null;
@@ -47,14 +47,14 @@ export default function SwapPage() {
 
   const handleSwap = async () => {
     setError(null);
-    setStatus("Preparando swap...");
+    setStatus("Preparing swap...");
     try {
-      if (!canSwap) throw new Error("Conecte a Phantom e selecione os tokens.");
-      if (!fromToken || !toToken) throw new Error("Selecione ambos os tokens.");
-      if (!hasPool) throw new Error("Pool não encontrado para este par de tokens.");
-      if (!amount || Number(amount) <= 0) throw new Error("Informe um valor maior que zero.");
+      if (!canSwap) throw new Error("Connect Phantom and select tokens.");
+      if (!fromToken || !toToken) throw new Error("Select both tokens.");
+      if (!hasPool) throw new Error("Pool not found for this token pair.");
+      if (!amount || Number(amount) <= 0) throw new Error("Enter a value greater than zero.");
 
-      // Buscar decimais on-chain para converter para unidades inteiras
+      // Fetch on-chain decimals to convert to integer units
       const [fromMintInfo, toMintInfo] = await Promise.all([
         getMint(connection, fromToken.mint),
         getMint(connection, toToken.mint),
@@ -67,7 +67,7 @@ export default function SwapPage() {
       );
       const minOutBn = new BN(minOutLamports.toString());
 
-      setStatus("Executando swap...");
+      setStatus("Executing swap...");
       const sig = await aegisClient.swap({
         fromMint: fromToken.mint,
         toMint: toToken.mint,
@@ -75,10 +75,10 @@ export default function SwapPage() {
         minAmountOut: minOutBn,
       });
 
-      setStatus(`Swap executado: ${sig}`);
+      setStatus(`Swap executed: ${sig}`);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Erro ao executar swap");
+      setError(err.message || "Error executing swap");
       setStatus(null);
     }
   };
@@ -94,44 +94,44 @@ export default function SwapPage() {
       <main className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-6">
         <div>
           <p className="text-sm uppercase tracking-[0.08em] text-white/60">AMM Swap</p>
-          <h1 className="text-3xl font-black tracking-tight">Trocar tokens</h1>
+          <h1 className="text-3xl font-black tracking-tight">Swap Tokens</h1>
           <p className="text-white/60 text-sm">
-            Selecione tokens disponíveis nos pools de liquidez do Aegis AMM
+            Select tokens available in Aegis AMM liquidity pools
           </p>
         </div>
 
         {poolsLoading && (
           <div className="rounded-lg border border-accent-orange/40 bg-accent-orange/10 p-3 text-sm text-accent-orange">
-            Carregando pools disponíveis...
+            Loading available pools...
           </div>
         )}
 
         {!connected && (
           <div className="rounded-lg border border-accent-orange/40 bg-accent-orange/10 p-3 text-sm text-accent-orange">
-            Conecte a Phantom para continuar.
+            Connect Phantom to continue.
           </div>
         )}
 
         {availableTokens.length === 0 && !poolsLoading && (
           <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-400">
-            Nenhum pool de liquidez encontrado. Crie pools primeiro na aba "Pools".
+            No liquidity pools found. Create pools first in the "Pools" tab.
           </div>
         )}
 
         <div className="card-surface p-6 flex flex-col gap-4">
-          {/* Token de entrada */}
+          {/* Input token */}
           <div className="space-y-2">
-            <label className="text-sm text-white/70">De</label>
+            <label className="text-sm text-white/70">From</label>
             <TokenSelector
               tokens={availableTokens}
               selectedToken={fromToken}
               onSelect={setFromToken}
-              placeholder="Selecione token de entrada"
+              placeholder="Select input token"
               excludeToken={toToken?.mint}
             />
           </div>
 
-          {/* Botão para trocar tokens */}
+          {/* Button to swap tokens */}
           <div className="flex justify-center">
             <button
               onClick={handleTokenSwitch}
@@ -144,20 +144,20 @@ export default function SwapPage() {
             </button>
           </div>
 
-          {/* Token de saída */}
+          {/* Output token */}
           <div className="space-y-2">
-            <label className="text-sm text-white/70">Para</label>
+            <label className="text-sm text-white/70">To</label>
             <TokenSelector
               tokens={availableTokens}
               selectedToken={toToken}
               onSelect={setToToken}
-              placeholder="Selecione token de saída"
+              placeholder="Select output token"
               excludeToken={fromToken?.mint}
             />
           </div>
 
           <label className="flex flex-col gap-2 text-sm">
-            <span className="text-white/70">Quantidade</span>
+            <span className="text-white/70">Amount</span>
             <input
               className="input"
               type="number"
@@ -169,20 +169,20 @@ export default function SwapPage() {
             />
           </label>
 
-          {/* Informações do Swap */}
+          {/* Swap Information */}
           {quote && !quoteLoading && (
             <div className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-3">
-              <h3 className="font-semibold text-white">Resumo do Swap</h3>
+              <h3 className="font-semibold text-white">Swap Summary</h3>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-white/60">Você receberá:</span>
+                  <span className="text-white/60">You will receive:</span>
                   <div className="text-white font-mono">
                     ≈ {(Number(quote.amountOut.toString()) / 1_000_000).toFixed(6)} {toToken?.symbol}
                   </div>
                 </div>
                 <div>
-                  <span className="text-white/60">Mínimo garantido:</span>
+                  <span className="text-white/60">Minimum guaranteed:</span>
                   <div className="text-white font-mono">
                     {(Number(quote.minAmountOut.toString()) / 1_000_000).toFixed(6)} {toToken?.symbol}
                   </div>
@@ -191,13 +191,13 @@ export default function SwapPage() {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-white/60">Taxa:</span>
+                  <span className="text-white/60">Fee:</span>
                   <div className="text-white font-mono">
                     {(Number(quote.fee.toString()) / 1_000_000).toFixed(6)} {fromToken?.symbol}
                   </div>
                 </div>
                 <div>
-                  <span className="text-white/60">Impacto no preço:</span>
+                  <span className="text-white/60">Price impact:</span>
                   <div className="text-white font-mono">
                     {quote.priceImpact.toFixed(2)}%
                   </div>
@@ -205,14 +205,14 @@ export default function SwapPage() {
               </div>
 
               <div className="text-xs text-white/60">
-                Pool: {fromToken?.symbol}/{toToken?.symbol} • Taxa: {quote.pool.feeBps / 100}%
+                Pool: {fromToken?.symbol}/{toToken?.symbol} • Fee: {quote.pool.feeBps / 100}%
               </div>
             </div>
           )}
 
           {quoteLoading && amount && (
             <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-              <div className="text-center text-white/60">Calculando cotação...</div>
+              <div className="text-center text-white/60">Calculating quote...</div>
             </div>
           )}
 
@@ -231,7 +231,7 @@ export default function SwapPage() {
 
           {!hasPool && fromToken && toToken && (
             <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-400">
-              Pool não encontrado para {fromToken.symbol} → {toToken.symbol}
+              Pool not found for {fromToken.symbol} → {toToken.symbol}
             </div>
           )}
 
@@ -240,22 +240,22 @@ export default function SwapPage() {
             disabled={!canSwap || !hasPool}
             onClick={handleSwap}
           >
-            {!connected ? "Conectar Phantom" :
-             !hasPool ? "Pool Indisponível" :
+            {!connected ? "Connect Phantom" :
+             !hasPool ? "Pool Unavailable" :
              "Swap"}
           </button>
 
           {status && <p className="text-white/80 text-sm">Status: {status}</p>}
-          {error && <p className="text-red-400 text-sm">Erro: {error}</p>}
+          {error && <p className="text-red-400 text-sm">Error: {error}</p>}
         </div>
 
         <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-xs text-white/70">
-          <p className="font-semibold text-white">Sobre o Aegis AMM</p>
+          <p className="font-semibold text-white">About Aegis AMM</p>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>Apenas tokens com pools de liquidez ativos são mostrados</li>
-            <li>Swaps usam fórmula constant-product (x * y = k)</li>
-            <li>Slippage protege contra mudanças de preço durante a transação</li>
-            <li>Certifique-se de ter ATAs para ambos os tokens</li>
+            <li>Only tokens with active liquidity pools are shown</li>
+            <li>Swaps use constant-product formula (x * y = k)</li>
+            <li>Slippage protects against price changes during transaction</li>
+            <li>Make sure you have ATAs for both tokens</li>
           </ul>
         </div>
       </main>

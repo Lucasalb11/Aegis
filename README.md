@@ -1,41 +1,41 @@
 # Aegis Protocol - Solana Student Hackathon Fall 2025
 
-> **Aegis Protocol** é uma plataforma de segurança on-chain para agentes AI na Solana, combinando vaults seguros, AMM (Automated Market Maker) e integração de oráculos para proteção contra slippage e manipulação de preços.
+> **Aegis Protocol** is an on-chain security platform for AI agents on Solana, combining secure vaults, AMM (Automated Market Maker), and oracle integration for slippage protection and price manipulation prevention.
 
-## 🎯 Visão
+## 🎯 Vision
 
-O Aegis Protocol revoluciona a interação de agentes AI com DeFi na Solana, oferecendo:
-- **Vaults Seguros**: Controle granular de gastos com aprovação humana para transações grandes
-- **AMM Integrado**: Sistema de troca de tokens com proteção contra slippage via oráculos
-- **Segurança Enterprise**: Validações rigorosas seguindo melhores práticas Solana
-- **UX Otimizada**: Interface intuitiva focada na experiência do usuário
+Aegis Protocol revolutionizes AI agent interaction with DeFi on Solana, offering:
+- **Secure Vaults**: Granular spending control with human approval for large transactions
+- **Integrated AMM**: Token swap system with slippage protection via oracles
+- **Enterprise Security**: Rigorous validations following Solana best practices
+- **Optimized UX**: Intuitive interface focused on user experience
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-### Vaults Inteligentes
-- ✅ Criação de vaults com políticas configuráveis
-- ✅ Controle de gastos diários e limites por transação
-- ✅ Sistema de aprovação para transações grandes
-- ✅ Suporte a múltiplos programas autorizados
+### Smart Vaults
+- ✅ Vault creation with configurable policies
+- ✅ Daily spending control and per-transaction limits
+- ✅ Approval system for large transactions
+- ✅ Support for multiple authorized programs
 
 ### AMM (Automated Market Maker)
-- ✅ Pools de liquidez com fórmula constant-product
-- ✅ Taxas configuráveis por pool
-- ✅ Sistema de LP tokens
-- ✅ Swaps diretos entre tokens
+- ✅ Liquidity pools with constant-product formula
+- ✅ Configurable fees per pool
+- ✅ LP token system
+- ✅ Direct token swaps
 
-### Integração de Oráculos
-- ✅ Suporte a oráculos Pyth e manuais
-- ✅ Proteção contra slippage em tempo real
-- ✅ Cálculo preciso de preços com impacto
-- ✅ Validação de freshness de dados
+### Oracle Integration
+- ✅ Support for Pyth and manual oracles
+- ✅ Real-time slippage protection
+- ✅ Accurate price calculation with impact
+- ✅ Data freshness validation
 
-### Frontend Moderno
-- ✅ Conexão nativa com Phantom Wallet
-- ✅ Interface responsiva com Tailwind CSS
-- ✅ Seleção inteligente de tokens disponíveis
-- ✅ Cotações em tempo real
-- ✅ Estatísticas de pools ao vivo
+### Modern Frontend
+- ✅ Native Phantom Wallet connection
+- ✅ Responsive interface with Tailwind CSS
+- ✅ Smart selection of available tokens
+- ✅ Real-time quotes
+- ✅ Live pool statistics
 
 ## 🛠️ Stack Tecnológico
 
@@ -46,158 +46,158 @@ O Aegis Protocol revoluciona a interação de agentes AI com DeFi na Solana, ofe
 - **Oráculos**: Pyth Network + Manual feeds
 - **Deploy**: Devnet/Mainnet ready
 
-## 📦 Instalação e Uso
+## 📦 Installation and Usage
 
-### 1. Pré-requisitos
+### 1. Prerequisites
 ```bash
-# Instalar dependências
+# Install dependencies
 npm install -g @solana/cli
 npm install -g anchor-cli
 ```
 
-### 2. Clonagem e Setup
+### 2. Clone and Setup
 ```bash
 git clone <repository-url>
 cd aegis-protocol
 
-# Instalar dependências do programa
+# Install program dependencies
 cd aegis-protocol/program
 npm install
 
-# Instalar dependências do SDK
+# Install SDK dependencies
 cd ../sdk
 npm install
 
-# Instalar dependências do frontend
+# Install frontend dependencies
 cd ../aegis-frontend
 npm install
 ```
 
-### 3. Deploy do Programa (Devnet)
+### 3. Program Deployment (Devnet)
 ```bash
 cd aegis-protocol/program
 anchor build
 anchor deploy --provider.cluster devnet
 ```
 
-### 4. Configuração do Frontend
+### 4. Frontend Configuration
 ```bash
 cd aegis-frontend
 cp env.local.example .env.local
-# Edite .env.local com seu RPC endpoint e program ID
+# Edit .env.local with your RPC endpoint and program ID
 ```
 
-### 5. Executar Frontend
+### 5. Run Frontend
 ```bash
 npm run dev
 ```
 
-### 6. Uso Básico
+### 6. Basic Usage
 
-#### Criar um Vault
-1. Conecte sua Phantom Wallet
-2. Configure limites de gasto diário
-3. Adicione programas autorizados
-4. Deposite SOL para começar
+#### Create a Vault
+1. Connect your Phantom Wallet
+2. Configure daily spending limits
+3. Add authorized programs
+4. Deposit SOL to start
 
-#### Criar um Pool AMM
-1. Escolha dois tokens (devem existir na devnet)
-2. Defina taxa de fee (ex: 0.3%)
-3. Adicione liquidez inicial
-4. Receba LP tokens
+#### Create an AMM Pool
+1. Choose two tokens (must exist on devnet)
+2. Set fee rate (e.g., 0.3%)
+3. Add initial liquidity
+4. Receive LP tokens
 
-#### Executar Swaps
-1. Selecione tokens disponíveis nos pools
-2. Digite quantidade desejada
+#### Execute Swaps
+1. Select available tokens from pools
+2. Enter desired amount
 3. Configure slippage tolerance
-4. Execute o swap
+4. Execute the swap
 
-## 🔐 Segurança
+## 🔐 Security
 
-O Aegis Protocol implementa múltiplas camadas de segurança:
+Aegis Protocol implements multiple layers of security:
 
 ### On-Chain Security
-- ✅ Validação rigorosa de ownership (`is_owned_by`)
-- ✅ Aritmética verificada (overflow/underflow protection)
-- ✅ PDAs seguros para contas derivadas
-- ✅ Validação de Cross-Program Invocations
-- ✅ Checks de tamanho de conta e seeds
+- ✅ Rigorous ownership validation (`is_owned_by`)
+- ✅ Checked arithmetic (overflow/underflow protection)
+- ✅ Secure PDAs for derived accounts
+- ✅ Cross-Program Invocation validation
+- ✅ Account size and seeds checks
 
 ### Oracle Security
-- ✅ Validação de staleness de preços
-- ✅ Suporte a múltiplas fontes de oráculo
-- ✅ Cálculo de impacto no preço
+- ✅ Price staleness validation
+- ✅ Support for multiple oracle sources
+- ✅ Price impact calculation
 - ✅ Slippage protection
 
 ### Frontend Security
-- ✅ Conexão segura com wallets
-- ✅ Validação de inputs
-- ✅ Error handling robusto
-- ✅ UX segura para transações
+- ✅ Secure wallet connection
+- ✅ Input validation
+- ✅ Robust error handling
+- ✅ Secure transaction UX
 
-## 📊 Arquitetura
+## 📊 Architecture
 
 ```
 Aegis Protocol
 ├── Program (Rust/Anchor)
-│   ├── Vaults - Controle de gastos AI
+│   ├── Vaults - AI spending control
 │   ├── AMM - Automated Market Maker
-│   ├── Oracles - Integração de preços
-│   └── Validation - Segurança on-chain
+│   ├── Oracles - Price integration
+│   └── Validation - On-chain security
 ├── SDK (TypeScript)
-│   ├── AegisClient - Interface high-level
+│   ├── AegisClient - High-level interface
 │   ├── TypeScript types - Type safety
 │   └── Event system - Real-time updates
 └── Frontend (Next.js)
-    ├── Swap Interface - Troca de tokens
-    ├── Pool Management - Gestão de liquidez
-    ├── Wallet Integration - Conexão Phantom
-    └── Analytics - Estatísticas de pools
+    ├── Swap Interface - Token exchange
+    ├── Pool Management - Liquidity management
+    ├── Wallet Integration - Phantom connection
+    └── Analytics - Pool statistics
 ```
 
 ## 🎓 Hackathon Focus
 
-Este projeto foi desenvolvido especificamente para o **Solana Student Hackathon Fall 2025**, atendendo aos critérios:
+This project was developed specifically for the **Solana Student Hackathon Fall 2025**, meeting the criteria:
 
-- ✅ **Inovação**: Sistema único de segurança para agentes AI
-- ✅ **Open-source**: Todo código disponível publicamente
-- ✅ **Deploy-ready**: Funciona em devnet/mainnet
-- ✅ **Demo-ready**: Vídeo demo profissional preparado
-- ✅ **Stack oficial**: Usa Anchor Framework e melhores práticas Solana
+- ✅ **Innovation**: Unique security system for AI agents
+- ✅ **Open-source**: All code publicly available
+- ✅ **Deploy-ready**: Works on devnet/mainnet
+- ✅ **Demo-ready**: Professional demo video prepared
+- ✅ **Official stack**: Uses Anchor Framework and Solana best practices
 
 ## 📈 Roadmap
 
 ### Phase 1 (Hackathon) ✅
-- Vaults seguros com políticas configuráveis
-- AMM básico com constant-product formula
-- Integração de oráculos manuais
-- Frontend funcional com Phantom
+- Secure vaults with configurable policies
+- Basic AMM with constant-product formula
+- Manual oracle integration
+- Functional frontend with Phantom
 
-### Phase 2 (Próximas melhorias)
-- Integração completa com Pyth Network
-- Governance para parâmetros de pool
-- Analytics avançados de yield
+### Phase 2 (Next Improvements)
+- Full Pyth Network integration
+- Governance for pool parameters
+- Advanced yield analytics
 - Mobile app companion
 
-### Phase 3 (Expansão)
+### Phase 3 (Expansion)
 - Cross-chain liquidity
 - Advanced order types (limit orders, TWAP)
-- Risk management automatizado
+- Automated risk management
 - Institutional-grade features
 
-## 🤝 Contribuição
+## 🤝 Contributing
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença Apache 2.0 - veja o arquivo [LICENSE](LICENSE) para detalhes.
+This project is licensed under Apache 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## 📞 Contato
+## 📞 Contact
 
 - **Email**: seu-email@exemplo.com
 - **Discord**: SeuDiscord#1234
@@ -205,6 +205,6 @@ Este projeto está sob a licença Apache 2.0 - veja o arquivo [LICENSE](LICENSE)
 
 ---
 
-**Desenvolvido com ❤️ para o Solana Student Hackathon Fall 2025**
+**Built with ❤️ for the Solana Student Hackathon Fall 2025**
 
-*Construindo o futuro da DeFi segura para agentes AI na Solana* 🚀
+*Building the future of secure DeFi for AI agents on Solana* 🚀

@@ -44,7 +44,8 @@ impl Pool {
         + 8 // lp_supply
         + 32 // creator
         + 8 // created_at
-        + 1 + 1 + 1 + 1 // bumps and flags
+        + 1 + 1 + 1 + 1 // bumps (pool, vault_a, vault_b, lp_mint)
+        + 1 // emergency_mode (bool)
         + 8 + 8 + 8 // volume tracking
         + 1 + 4 // version + feature flags
         + 16 // reward_points

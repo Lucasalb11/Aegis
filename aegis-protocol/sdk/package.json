@@ -5,6 +5,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "setup:devnet": "ts-node scripts/setup-complete-devnet.ts",
+    "setup:complete": "ts-node scripts/complete-setup-with-upgrade.ts",
+    "close:buffers": "bash scripts/close-all-buffers.sh",
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",

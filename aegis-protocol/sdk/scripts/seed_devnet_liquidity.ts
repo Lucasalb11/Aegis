@@ -116,7 +116,7 @@ class KeypairWallet implements Wallet {
 // Configuration from environment
 const config = {
   rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
-  programId: new PublicKey(process.env.AEGIS_PROGRAM_ID || 'FqGarB7xanZe2PWXxsFdxMgkYF1kR4q6E1VSSWsTgBc9'),
+  programId: new PublicKey(process.env.AEGIS_PROGRAM_ID || 'AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu'),
   commitment: (process.env.COMMITMENT || 'confirmed') as 'confirmed' | 'finalized' | 'processed',
   treasuryKeypairPath: process.env.TREASURY_KEYPAIR_PATH || path.join(__dirname, '../../.secrets/devnet/treasury.json'),
   walletsDir: process.env.WALLETS_DIR || path.join(__dirname, '../../local/wallets'),

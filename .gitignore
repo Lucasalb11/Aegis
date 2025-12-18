@@ -1,13 +1,52 @@
-node_modules
+# Dependencies
+node_modules/
+
+# OS files
 .DS_Store
+.DS_Store?
+._*
+
+# Environment variables
 .env
 .env.*
+.env.local
+.env.*.local
+
+# Secrets and private keys - NEVER COMMIT THESE!
 .secrets/
-aegis-frontend/.env.local
+**/.secrets/
+**/secrets/
+local/wallets/
+**/wallets/
+**/*wallet*.json
+**/*key*.json
+**/*secret*.json
+**/*private*.json
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Build outputs
 aegis-frontend/.next/
 aegis-frontend/.vercel
-aegis-protocol/.env
-aegis-protocol/.env.*
-aegis-protocol/.secrets/
+aegis-frontend/dist/
+aegis-frontend/build/
+aegis-protocol/program/target/
+aegis-protocol/program/.anchor/
 test-ledger/
-local/wallets/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~

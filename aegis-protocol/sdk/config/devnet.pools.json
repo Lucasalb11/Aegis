@@ -1,4 +1,75 @@
 {
-  "pools": [],
-  "createdAt": 1766054284907
+  "pools": [
+    {
+      "mintA": "DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3",
+      "mintB": "GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9",
+      "poolAddress": "CU4JuEFWEZBKBzy2ut4yy1L25uYtFTnREkfHHhJD3SLD",
+      "vaultA": "Cm6S7BSHKffwyiwjttuE7n1uWDJNxVe4EL3XUDJkNNy2",
+      "vaultB": "2A3TBzmBg2dxfDtbY4VQYAZDgkgxukzFMgQeMxkSLyjF",
+      "lpMint": "EiqmqXQAwnVECGbhzHSLzWnSRfUjEPu2GMtUG2DQaw5S",
+      "feeBps": 30,
+      "decimalsA": 6,
+      "decimalsB": 6,
+      "symbolA": "AEGIS",
+      "symbolB": "AERO",
+      "timestamp": 1766080859241
+    },
+    {
+      "mintA": "3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc",
+      "mintB": "GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9",
+      "poolAddress": "Ebsazq7hSoGjw2eKPPJS1nfVzLM29RxbDXEsuRg62aWM",
+      "vaultA": "HM87eqzPWGpRdsFiXrtCdwRLkvZUsvtJ14ZG3CDmPcix",
+      "vaultB": "Dqy7BPcz4D4Fk37oSuPhrtghyYK5UbrPJYVe3dXsFDqv",
+      "lpMint": "9NTcDAUXSfnUUJkcghD6UYKyrUU4oA6ynQxBhu7fjHo",
+      "feeBps": 30,
+      "decimalsA": 6,
+      "decimalsB": 6,
+      "symbolA": "AEGIS",
+      "symbolB": "ABTC",
+      "timestamp": 1766080860566
+    },
+    {
+      "mintA": "D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys",
+      "mintB": "GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9",
+      "poolAddress": "E7haxmME6WR1Eu77dvyftMcDE9Dc81MbmF5RNU8NGdtt",
+      "vaultA": "J7FKr1XdX7oPFZ57A4YJCdb4e1k7MpJgvktSEQWMeSmZ",
+      "vaultB": "HprTYoBPJsQtq2yCNZWEYMUkjVvALdoKbhHZZ1j8NZVr",
+      "lpMint": "CT9ATmXV3jVPVocdZZfGkEsmsBCMSnghgWKwPeueVXg9",
+      "feeBps": 30,
+      "decimalsA": 6,
+      "decimalsB": 6,
+      "symbolA": "AEGIS",
+      "symbolB": "AUSD",
+      "timestamp": 1766080861898
+    },
+    {
+      "mintA": "7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15",
+      "mintB": "GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9",
+      "poolAddress": "FcwzNJ5GQjZPQ9vZXq1rTMx8Z48RaPHbgZ2oPn3a8hyZ",
+      "vaultA": "6D1nvhDJiswAFNGGtkahyDLmCQEqBiPYvGbZ65asz7zi",
+      "vaultB": "BfA2EHvggDyxVnSkZHjwdUsmQeo4yTL4TpEQt1tTjtvY",
+      "lpMint": "CCn6T5btgHMsoCkYUvE7emAjq6Qk4Urve1vVLEghXkZt",
+      "feeBps": 30,
+      "decimalsA": 6,
+      "decimalsB": 6,
+      "symbolA": "AEGIS",
+      "symbolB": "ASOL",
+      "timestamp": 1766080863216
+    },
+    {
+      "mintA": "3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc",
+      "mintB": "DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3",
+      "poolAddress": "DVABept9bRH8ucTNsqQLuCTcxwo3x46JgozybAEfWEct",
+      "vaultA": "FAjipUpxrr2AZGosCGK7rkwNebF9M9di6USGWSbs6od7",
+      "vaultB": "CarrfakgHCrrgZ95eweFUKMW8zhyodUDXcyJ8SV3WqtK",
+      "lpMint": "4YtCxnLULwVcMb1hzX3dhch7sUsiAm8yiZsMKM3y8cXx",
+      "feeBps": 30,
+      "decimalsA": 6,
+      "decimalsB": 6,
+      "symbolA": "AERO",
+      "symbolB": "ABTC",
+      "timestamp": 1766080864538
+    }
+  ],
+  "createdAt": 1766080869798
 }

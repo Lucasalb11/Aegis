@@ -63,74 +63,11 @@ pub struct InitializeEmissionVaultCore<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-#[derive(Accounts)]
-pub struct InitializeEmissionTokenAccounts<'info> {
-    #[account(mut)]
-    pub admin: Signer<'info>,
-    #[account(
-        seeds = [b"reward_minter"],
-        bump
-    )]
-    /// CHECK: PDA used only as mint authority
-    pub reward_minter: UncheckedAccount<'info>,
-    #[account(
-        address = reward_minter.key() @ ErrorCode::InvalidMintAuthority
-    )]
-    pub aegis_mint: Account<'info, Mint>,
-    #[account(
-        mut,
-        seeds = [b"emission_vault"],
-        bump = emission_vault.bump
-    )]
-    pub emission_vault: Account<'info, EmissionVault>,
-    #[account(
-        init,
-        payer = admin,
-        seeds = [b"emission_token_account"],
-        bump,
-        token::mint = aegis_mint,
-        token::authority = emission_vault
-    )]
-    pub emission_token_account: Account<'info, TokenAccount>,
-    #[account(
-        init,
-        payer = admin,
-        seeds = [b"lm_vault"],
-        bump,
-        token::mint = aegis_mint,
-        token::authority = emission_vault
-    )]
-    pub lm_vault: Account<'info, TokenAccount>,
-    #[account(
-        init,
-        payer = admin,
-        seeds = [b"team_vault"],
-        bump,
-        token::mint = aegis_mint,
-        token::authority = emission_vault
-    )]
-    pub team_vault: Account<'info, TokenAccount>,
-    #[account(
-        init,
-        payer = admin,
-        seeds = [b"ecosystem_vault"],
-        bump,
-        token::mint = aegis_mint,
-        token::authority = emission_vault
-    )]
-    pub ecosystem_vault: Account<'info, TokenAccount>,
-    #[account(
-        init,
-        payer = admin,
-        seeds = [b"team_vesting"],
-        bump,
-        space = TeamVesting::SIZE
-    )]
-    pub team_vesting: Account<'info, TeamVesting>,
-    pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, Token>,
-    pub rent: Sysvar<'info, Rent>,
-}
+// Temporarily disabled due to stack size issue - will be reimplemented as separate instructions
+// #[derive(Accounts)]
+// pub struct InitializeEmissionTokenAccounts<'info> {
+//     ...
+// }
 
 #[derive(Accounts)]
 pub struct DistributeWeeklyRewards<'info> {
@@ -215,67 +152,86 @@ pub fn initialize_emission_vault_core(ctx: Context<InitializeEmissionVaultCore>)
     Ok(())
 }
 
-#[inline(never)]
+// Temporarily disabled - will be reimplemented
+/*
 pub fn initialize_emission_token_accounts(ctx: Context<InitializeEmissionTokenAccounts>) -> Result<()> {
-    let emission_vault = &mut ctx.accounts.emission_vault;
-    emission_vault.emission_token_account = ctx.accounts.emission_token_account.key();
-    emission_vault.lm_vault = ctx.accounts.lm_vault.key();
-    emission_vault.team_vault = ctx.accounts.team_vault.key();
-    emission_vault.ecosystem_vault = ctx.accounts.ecosystem_vault.key();
+    // Update emission vault - use minimal scope
+    {
+        let emission_vault = &mut ctx.accounts.emission_vault;
+        emission_vault.emission_token_account = ctx.accounts.emission_token_account.key();
+        emission_vault.lm_vault = ctx.accounts.lm_vault.key();
+        emission_vault.team_vault = ctx.accounts.team_vault.key();
+        emission_vault.ecosystem_vault = ctx.accounts.ecosystem_vault.key();
+    }
 
-    let now = Clock::get()?.unix_timestamp;
-    let vesting = &mut ctx.accounts.team_vesting;
-    vesting.bump = ctx.bumps.team_vesting;
-    vesting.start_ts = now;
-    let month_seconds: i64 = 30 * 24 * 60 * 60;
-    vesting.cliff_end_ts = now
-        .checked_add(month_seconds * 12)
-        .ok_or(error!(ErrorCode::ArithmeticOverflow))?;
-    vesting.linear_end_ts = vesting
-        .cliff_end_ts
-        .checked_add(month_seconds * 36)
-        .ok_or(error!(ErrorCode::ArithmeticOverflow))?;
-    vesting.claimed = 0;
-    vesting.vault = ctx.accounts.team_vault.key();
-    vesting.treasury = ctx.accounts.admin.key();
-    vesting.guardians = [ctx.accounts.admin.key(); 7];
-    vesting.threshold = 4;
-    vesting._reserved = [0; 7];
+    // Initialize team vesting - calculate values inline to reduce stack
+    {
+        let now = Clock::get()?.unix_timestamp;
+        const MONTH_SECONDS: i64 = 30 * 24 * 60 * 60;
+        let cliff_end = now
+            .checked_add(MONTH_SECONDS * 12)
+            .ok_or(error!(ErrorCode::ArithmeticOverflow))?;
+        let linear_end = cliff_end
+            .checked_add(MONTH_SECONDS * 36)
+            .ok_or(error!(ErrorCode::ArithmeticOverflow))?;
+        
+        let vesting = &mut ctx.accounts.team_vesting;
+        let admin_key = ctx.accounts.admin.key();
+        vesting.bump = ctx.bumps.team_vesting;
+        vesting.start_ts = now;
+        vesting.cliff_end_ts = cliff_end;
+        vesting.linear_end_ts = linear_end;
+        vesting.claimed = 0;
+        vesting.vault = ctx.accounts.team_vault.key();
+        vesting.treasury = admin_key;
+        // Initialize guardians array element by element to reduce stack usage
+        vesting.guardians[0] = admin_key;
+        vesting.guardians[1] = admin_key;
+        vesting.guardians[2] = admin_key;
+        vesting.guardians[3] = admin_key;
+        vesting.guardians[4] = admin_key;
+        vesting.guardians[5] = admin_key;
+        vesting.guardians[6] = admin_key;
+        vesting.threshold = 4;
+        vesting._reserved = [0; 7];
+    }
 
-    let reward_minter_bump = ctx.bumps.reward_minter;
-    let supply_lamports: u128 = AEGIS_TOTAL_SUPPLY_LAMPORTS;
-    let capped_supply = if supply_lamports > u128::from(u64::MAX) {
+    // Mint tokens - calculate supply first to reduce stack usage
+    const SUPPLY_LAMPORTS: u128 = AEGIS_TOTAL_SUPPLY_LAMPORTS;
+    let capped_supply = if SUPPLY_LAMPORTS > u128::from(u64::MAX) {
         msg!(
             "Requested total supply {} exceeds SPL limit; capping to {}",
-            supply_lamports,
+            SUPPLY_LAMPORTS,
             u64::MAX
         );
         u64::MAX
     } else {
-        supply_lamports as u64
+        SUPPLY_LAMPORTS as u64
     };
 
-    let (_rm_bump, rm_seeds) = seeds::reward_minter_seeds(reward_minter_bump);
-    let mut rm_signer_seeds: Vec<&[u8]> = Vec::with_capacity(rm_seeds.len());
-    for s in rm_seeds.iter() {
-        rm_signer_seeds.push(s.as_slice());
+    // Create seeds and mint in separate scope to free stack earlier
+    {
+        let reward_minter_bump = ctx.bumps.reward_minter;
+        let (_rm_bump, rm_seeds) = seeds::reward_minter_seeds(reward_minter_bump);
+        // Build signer seeds slice directly without intermediate Vec
+        let rm_signer_seeds: [&[u8]; 2] = [rm_seeds[0].as_slice(), rm_seeds[1].as_slice()];
+        token::mint_to(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                MintTo {
+                    mint: ctx.accounts.aegis_mint.to_account_info(),
+                    to: ctx.accounts.emission_token_account.to_account_info(),
+                    authority: ctx.accounts.reward_minter.to_account_info(),
+                },
+                &[&rm_signer_seeds],
+            ),
+            capped_supply,
+        )?;
     }
-    let rm_signer_slice: &[&[u8]] = rm_signer_seeds.as_slice();
-    token::mint_to(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            MintTo {
-                mint: ctx.accounts.aegis_mint.to_account_info(),
-                to: ctx.accounts.emission_token_account.to_account_info(),
-                authority: ctx.accounts.reward_minter.to_account_info(),
-            },
-            &[rm_signer_slice],
-        ),
-        capped_supply,
-    )?;
 
     Ok(())
 }
+*/
 
 #[inline(never)]
 pub fn distribute_weekly_rewards(ctx: Context<DistributeWeeklyRewards>) -> Result<()> {

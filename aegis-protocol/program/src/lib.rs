@@ -42,9 +42,6 @@ pub mod aegis_protocol {
         instructions::tokenomics::initialize_emission_vault_core(ctx)
     }
 
-    pub fn initialize_emission_token_accounts(ctx: Context<InitializeEmissionTokenAccounts>) -> Result<()> {
-        instructions::tokenomics::initialize_emission_token_accounts(ctx)
-    }
 
     pub fn distribute_weekly_rewards(ctx: Context<DistributeWeeklyRewards>) -> Result<()> {
         instructions::tokenomics::distribute_weekly_rewards(ctx)

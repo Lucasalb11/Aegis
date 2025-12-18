@@ -165,113 +165,9 @@ async function main() {
   let liquidityAdded = 0;
   const poolsOutput: any[] = [];
   
-  // STEP 1: Criar pools entre tokens e SOL
+  // STEP 1: Criar pools entre tokens (token-token) - não depende de upgrade
   console.log('='.repeat(60));
-  console.log('STEP 1: Criando pools Token/SOL\n');
-  
-  const solMint = new PublicKey('So1111111111111111111111111111111112');
-  
-  for (const token of mintedTokens) {
-    try {
-      const tokenMint = new PublicKey(token.mint);
-      const [mintA, mintB] = sortMints(solMint, tokenMint);
-      
-      console.log(`  🏊 Criando pool SOL/${token.symbol}...`);
-      
-      // Check if pool exists
-      let pool: Pool | null = null;
-      try {
-        pool = await aegis.getPool(mintA, mintB);
-        if (pool) {
-          console.log(`    ⏭️  Pool já existe: ${pool.info.address.toString()}`);
-          poolsExisting++;
-        }
-      } catch {}
-      
-      if (!pool) {
-        try {
-          pool = await aegis.getOrCreatePool(mintA, mintB, feeBps);
-          console.log(`    ✅ Pool criada: ${pool.info.address.toString()}`);
-          poolsCreated++;
-        } catch (error: any) {
-          console.error(`    ❌ Erro ao criar pool: ${error.message}`);
-          if (error.logs) {
-            console.error(`    Logs:`, error.logs.slice(0, 3));
-          }
-          continue;
-        }
-      }
-      
-      // Add liquidity
-      const amountSol = Math.floor(liquidityAmount * LAMPORTS_PER_SOL);
-      const amountToken = Math.floor(liquidityAmount * Math.pow(10, token.decimals));
-      
-      const userSol = treasury.publicKey; // SOL não precisa de ATA
-      const userToken = await getOrCreateAssociatedTokenAccount(
-        connection,
-        treasury,
-        tokenMint,
-        treasury.publicKey
-      );
-      const userLp = await getOrCreateAssociatedTokenAccount(
-        connection,
-        treasury,
-        pool.info.lpMint,
-        treasury.publicKey
-      );
-      
-      // Check balances
-      const balanceToken = await getAccount(connection, userToken.address).catch(() => null);
-      const balanceSol = await connection.getBalance(treasury.publicKey);
-      
-      if (!balanceToken || Number(balanceToken.amount) < amountToken) {
-        console.log(`    ⚠️  Saldo insuficiente de ${token.symbol}: precisa ${amountToken}, tem ${balanceToken?.amount.toString() || '0'}`);
-        continue;
-      }
-      
-      if (balanceSol < amountSol) {
-        console.log(`    ⚠️  Saldo insuficiente de SOL: precisa ${amountSol / LAMPORTS_PER_SOL}, tem ${balanceSol / LAMPORTS_PER_SOL}`);
-        continue;
-      }
-      
-      console.log(`    💧 Adicionando liquidez: ${amountSol / LAMPORTS_PER_SOL} SOL / ${amountToken / Math.pow(10, token.decimals)} ${token.symbol}`);
-      
-      try {
-        await pool.addLiquidity(
-          { amountA: new BN(amountSol), amountB: new BN(amountToken) },
-          userSol,
-          userToken.address,
-          userLp.address
-        );
-        console.log(`    ✅ Liquidez adicionada!\n`);
-        liquidityAdded++;
-      } catch (error: any) {
-        console.error(`    ❌ Erro ao adicionar liquidez: ${error.message}\n`);
-        continue;
-      }
-      
-      poolsOutput.push({
-        mintA: mintA.toString(),
-        mintB: mintB.toString(),
-        poolAddress: pool.info.address.toString(),
-        vaultA: pool.info.vaultA.toString(),
-        vaultB: pool.info.vaultB.toString(),
-        lpMint: pool.info.lpMint.toString(),
-        feeBps,
-        decimalsA: 9, // SOL
-        decimalsB: token.decimals,
-        timestamp: Date.now(),
-      });
-      
-      await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (error: any) {
-      console.error(`  ❌ Erro processando ${token.symbol}: ${error.message}\n`);
-    }
-  }
-  
-  // STEP 2: Criar pools entre tokens (token-token)
-  console.log('='.repeat(60));
-  console.log('STEP 2: Criando pools Token/Token\n');
+  console.log('STEP 1: Criando pools Token/Token\n');
   
   for (let i = 0; i < mintedTokens.length; i++) {
     for (let j = i + 1; j < mintedTokens.length; j++) {
@@ -374,16 +270,16 @@ async function main() {
     }
   }
   
-  // STEP 3: Carregar/criar 50 wallets
+  // STEP 2: Carregar/criar 50 wallets
   console.log('='.repeat(60));
-  console.log('STEP 3: Carregando/Criando 50 wallets\n');
+  console.log('STEP 2: Carregando/Criando 50 wallets\n');
   
   const wallets = await loadOrCreateWallets(50, walletsDir);
   console.log(`✅ ${wallets.length} wallets carregadas\n`);
   
-  // STEP 4: Distribuir SOL e tokens para wallets
+  // STEP 3: Distribuir SOL e tokens para wallets
   console.log('='.repeat(60));
-  console.log('STEP 4: Distribuindo SOL e tokens para wallets\n');
+  console.log('STEP 3: Distribuindo SOL e tokens para wallets\n');
   
   const solPerWallet = parseFloat(process.env.INITIAL_SOL_PER_WALLET || '0.25');
   const tokenPerWallet = parseFloat(process.env.INITIAL_TOKEN_PER_WALLET || '10000');

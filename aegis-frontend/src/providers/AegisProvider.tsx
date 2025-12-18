@@ -71,7 +71,11 @@ export function AegisProvider({
 export function useAegis() {
   const context = useContext(AegisContext);
   if (!context) {
-    throw new Error("useAegis must be used within an AegisProvider");
+    console.warn("[useAegis] Hook called outside AegisProvider. Returning default values.");
+    return {
+      aegisClient: null,
+      programId: null,
+    };
   }
   return context;
 }

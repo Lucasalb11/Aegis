@@ -58,12 +58,32 @@ export default function CreatePoolPage() {
       }));
       setCommonTokens(tokens);
     } catch (error) {
-      console.error('Error initializing common tokens:', error);
+      console.error('[CreatePoolPage] Error initializing common tokens:', error);
       setCommonTokens([]);
     }
   }, []);
 
-  const allTokens = useMemo(() => [...commonTokens, ...availableTokens], [commonTokens, availableTokens]);
+  const allTokens = useMemo(() => {
+    try {
+      // Filter out duplicates based on mint address
+      const tokenMap = new Map<string, TokenInfo>();
+      
+      // Add common tokens first
+      commonTokens.forEach(token => {
+        tokenMap.set(token.mint.toString(), token);
+      });
+      
+      // Add available tokens (may override common tokens if same mint)
+      availableTokens.forEach(token => {
+        tokenMap.set(token.mint.toString(), token);
+      });
+      
+      return Array.from(tokenMap.values());
+    } catch (error) {
+      console.error('[CreatePoolPage] Error combining tokens:', error);
+      return commonTokens;
+    }
+  }, [commonTokens, availableTokens]);
 
   const canCreatePool = connected && aegisClient && programId && tokenA && tokenB && tokenA.mint.toString() !== tokenB.mint.toString();
 
@@ -77,11 +97,11 @@ export default function CreatePoolPage() {
       }
       
       if (!aegisClient) {
-        throw new Error("Cliente Aegis não inicializado. Verifique sua conexão.");
+        throw new Error("Cliente Aegis não inicializado. Verifique sua conexão e recarregue a página.");
       }
 
       if (!programId) {
-        throw new Error("Program ID não configurado.");
+        throw new Error("Program ID não configurado. Verifique as variáveis de ambiente.");
       }
 
       if (!tokenA || !tokenB) {
@@ -109,7 +129,7 @@ export default function CreatePoolPage() {
       }, 2000);
 
     } catch (err: any) {
-      console.error("Error creating pool:", err);
+      console.error("[CreatePoolPage] Error creating pool:", err);
       const errorMessage = err.message || err.toString() || "Erro ao criar pool";
       setError(errorMessage);
       setStatus(null);
@@ -133,9 +153,21 @@ export default function CreatePoolPage() {
           </p>
         </div>
 
+        {!programId && (
+          <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-400">
+            ⚠️ Program ID não configurado. Configure NEXT_PUBLIC_AEGIS_PROGRAM_ID nas variáveis de ambiente.
+          </div>
+        )}
+
         {!connected && (
           <div className="rounded-lg border border-accent-orange/40 bg-accent-orange/10 p-3 text-sm text-accent-orange">
             Conecte a Phantom para continuar.
+          </div>
+        )}
+
+        {connected && !aegisClient && (
+          <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-400">
+            ⚠️ Cliente Aegis não inicializado. Tente recarregar a página após conectar a carteira.
           </div>
         )}
 
@@ -144,7 +176,7 @@ export default function CreatePoolPage() {
           <div className="space-y-2">
             <label className="text-sm text-white/70">Token A</label>
             <TokenSelector
-              tokens={allTokens}
+              tokens={allTokens || []}
               selectedToken={tokenA}
               onSelect={setTokenA}
               placeholder="Selecione o primeiro token"
@@ -169,7 +201,7 @@ export default function CreatePoolPage() {
           <div className="space-y-2">
             <label className="text-sm text-white/70">Token B</label>
             <TokenSelector
-              tokens={allTokens}
+              tokens={allTokens || []}
               selectedToken={tokenB}
               onSelect={setTokenB}
               placeholder="Selecione o segundo token"

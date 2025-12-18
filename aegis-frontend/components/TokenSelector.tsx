@@ -24,8 +24,11 @@ export function TokenSelector({
 }: TokenSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const filteredTokens = tokens.filter(token =>
-    !excludeToken || !token.mint.equals(excludeToken)
+  // Ensure tokens is always an array
+  const safeTokens = Array.isArray(tokens) ? tokens : [];
+  
+  const filteredTokens = safeTokens.filter(token =>
+    token && token.mint && (!excludeToken || !token.mint.equals(excludeToken))
   );
 
   const handleSelect = (token: TokenInfo) => {

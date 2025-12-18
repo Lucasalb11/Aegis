@@ -123,22 +123,42 @@ export async function calculatePoolTVL(
   poolInfo: PoolInfo
 ): Promise<PoolMetrics> {
   try {
-    // Get vault balances
+    // Get vault balances with better error handling
     const [vaultA, vaultB] = await Promise.all([
-      getAccount(connection, poolInfo.vaultA).catch(() => null),
-      getAccount(connection, poolInfo.vaultB).catch(() => null),
+      getAccount(connection, poolInfo.vaultA).catch((err) => {
+        console.warn(`[calculatePoolTVL] Failed to fetch vault A ${poolInfo.vaultA.toString()}:`, err);
+        return null;
+      }),
+      getAccount(connection, poolInfo.vaultB).catch((err) => {
+        console.warn(`[calculatePoolTVL] Failed to fetch vault B ${poolInfo.vaultB.toString()}:`, err);
+        return null;
+      }),
     ]);
 
-    // Get token metadata
+    // Get token metadata with fallbacks
     const [tokenAInfo, tokenBInfo] = await Promise.all([
-      getTokenMetadata(connection, poolInfo.mintA),
-      getTokenMetadata(connection, poolInfo.mintB),
+      getTokenMetadata(connection, poolInfo.mintA).catch(() => ({
+        symbol: poolInfo.mintA.toString().slice(0, 4),
+        name: 'Unknown Token',
+        decimals: 6,
+      })),
+      getTokenMetadata(connection, poolInfo.mintB).catch(() => ({
+        symbol: poolInfo.mintB.toString().slice(0, 4),
+        name: 'Unknown Token',
+        decimals: 6,
+      })),
     ]);
 
-    // Get token decimals
+    // Get token decimals with fallbacks
     const [mintAInfo, mintBInfo] = await Promise.all([
-      getMint(connection, poolInfo.mintA).catch(() => ({ decimals: tokenAInfo.decimals })),
-      getMint(connection, poolInfo.mintB).catch(() => ({ decimals: tokenBInfo.decimals })),
+      getMint(connection, poolInfo.mintA).catch((err) => {
+        console.warn(`[calculatePoolTVL] Failed to fetch mint A info:`, err);
+        return { decimals: tokenAInfo.decimals };
+      }),
+      getMint(connection, poolInfo.mintB).catch((err) => {
+        console.warn(`[calculatePoolTVL] Failed to fetch mint B info:`, err);
+        return { decimals: tokenBInfo.decimals };
+      }),
     ]);
 
     // Calculate amounts
@@ -160,10 +180,11 @@ export async function calculatePoolTVL(
 
     // Calculate fees (estimate based on feeBps)
     // In production, track actual swap volume from transaction history
-    const estimatedVolume24h = tvlUsd * 0.1; // Estimate 10% of TVL as daily volume
+    const estimatedVolume24h = tvlUsd > 0 ? tvlUsd * 0.1 : 0; // Estimate 10% of TVL as daily volume
     const fees24hUsd = (estimatedVolume24h * poolInfo.feeBps) / 10000;
 
     // Calculate APR (simplified: fees / TVL * 365)
+    // Avoid division by zero
     const apr = tvlUsd > 0 ? (fees24hUsd / tvlUsd) * 365 * 100 : 0;
 
     return {
@@ -184,9 +205,9 @@ export async function calculatePoolTVL(
         icon: tokenBInfo.icon,
       },
     };
-  } catch (error) {
-    console.error('Error calculating pool TVL:', error);
-    // Return default values
+  } catch (error: any) {
+    console.error(`[calculatePoolTVL] Error calculating pool TVL for pool ${poolInfo.publicKey.toString()}:`, error);
+    // Return default values with pool info
     return {
       tvlUsd: 0,
       volume24hUsd: 0,

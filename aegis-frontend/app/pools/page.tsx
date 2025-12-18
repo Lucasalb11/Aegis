@@ -5,13 +5,33 @@ import { TopNav } from "@/components/TopNav";
 import { PoolCard } from "@/components/PoolCard";
 import { useRealPools } from "@/src/hooks/useRealPools";
 import { PublicKey } from "@solana/web3.js";
+import { useEffect, useState } from "react";
 
-const PROGRAM_ID = process.env.NEXT_PUBLIC_AEGIS_PROGRAM_ID
-  ? new PublicKey(process.env.NEXT_PUBLIC_AEGIS_PROGRAM_ID)
-  : undefined;
+function getProgramId(): PublicKey | undefined {
+  const programIdStr = process.env.NEXT_PUBLIC_AEGIS_PROGRAM_ID;
+  if (!programIdStr) {
+    console.warn("[PoolsPage] NEXT_PUBLIC_AEGIS_PROGRAM_ID not configured");
+    return undefined;
+  }
+  try {
+    return new PublicKey(programIdStr);
+  } catch (err) {
+    console.error("[PoolsPage] Invalid program ID:", err);
+    return undefined;
+  }
+}
 
 export default function PoolsPage() {
-  const { pools, loading, error, refreshPools, lastUpdate } = useRealPools(PROGRAM_ID);
+  const [programId] = useState(() => getProgramId());
+  const { pools, loading, error, refreshPools, lastUpdate } = useRealPools(programId);
+
+  useEffect(() => {
+    if (programId) {
+      console.log(`[PoolsPage] Using program ID: ${programId.toString()}`);
+    } else {
+      console.warn("[PoolsPage] Program ID not configured. Pools will not load.");
+    }
+  }, [programId]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -46,10 +66,23 @@ export default function PoolsPage() {
           </div>
         </div>
 
+        {!programId && (
+          <div className="mb-8 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+            <p className="text-yellow-400 text-sm font-semibold mb-1">⚠️ Program ID Not Configured</p>
+            <p className="text-yellow-300/80 text-sm">
+              NEXT_PUBLIC_AEGIS_PROGRAM_ID is not set. Please configure it in your environment variables.
+            </p>
+          </div>
+        )}
+
         {error && (
           <div className="mb-8 p-4 bg-red-500/10 rounded-lg border border-red-500/20">
-            <p className="text-red-400 text-sm">
-              Error loading pools: {error}. Make sure you're connected to the correct network.
+            <p className="text-red-400 text-sm font-semibold mb-1">❌ Error Loading Pools</p>
+            <p className="text-red-300/80 text-sm">
+              {error}
+            </p>
+            <p className="text-red-300/60 text-xs mt-2">
+              Make sure you're connected to the correct network (devnet) and the program is deployed.
             </p>
           </div>
         )}

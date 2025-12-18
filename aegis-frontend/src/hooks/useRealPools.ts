@@ -18,12 +18,15 @@ export function useRealPools(programId?: PublicKey) {
   const fetchPoolMetrics = useCallback(async () => {
     if (!connection || poolInfos.length === 0) {
       setPools([]);
+      setLoadingMetrics(false);
       return;
     }
 
     setLoadingMetrics(true);
 
     try {
+      console.log(`[useRealPools] Fetching metrics for ${poolInfos.length} pools`);
+      
       const poolsWithMetrics = await Promise.all(
         poolInfos.map(async (poolInfo) => {
           try {
@@ -32,8 +35,14 @@ export function useRealPools(programId?: PublicKey) {
             
             // Get token metadata
             const [tokenAInfo, tokenBInfo] = await Promise.all([
-              getTokenMetadata(connection, poolInfo.mintA),
-              getTokenMetadata(connection, poolInfo.mintB),
+              getTokenMetadata(connection, poolInfo.mintA).catch(err => {
+                console.warn(`[useRealPools] Failed to get metadata for token A ${poolInfo.mintA.toString()}:`, err);
+                return { symbol: 'UNKNOWN', name: 'Unknown Token', decimals: 6 };
+              }),
+              getTokenMetadata(connection, poolInfo.mintB).catch(err => {
+                console.warn(`[useRealPools] Failed to get metadata for token B ${poolInfo.mintB.toString()}:`, err);
+                return { symbol: 'UNKNOWN', name: 'Unknown Token', decimals: 6 };
+              }),
             ]);
 
             // Generate historical APR data (simplified - in production, fetch from historical data)
@@ -80,9 +89,10 @@ export function useRealPools(programId?: PublicKey) {
               history,
             };
 
+            console.log(`[useRealPools] Successfully processed pool ${pool.slug} (TVL: $${metrics.tvlUsd.toFixed(2)})`);
             return pool;
-          } catch (err) {
-            console.error('Error fetching metrics for pool:', poolInfo.publicKey.toString(), err);
+          } catch (err: any) {
+            console.error(`[useRealPools] Error fetching metrics for pool ${poolInfo.publicKey.toString()}:`, err);
             return null;
           }
         })
@@ -90,9 +100,10 @@ export function useRealPools(programId?: PublicKey) {
 
       // Filter out null values
       const validPools = poolsWithMetrics.filter((p): p is Pool => p !== null);
+      console.log(`[useRealPools] Successfully processed ${validPools.length}/${poolInfos.length} pools`);
       setPools(validPools);
-    } catch (err) {
-      console.error('Error fetching pool metrics:', err);
+    } catch (err: any) {
+      console.error('[useRealPools] Error fetching pool metrics:', err);
       setPools([]);
     } finally {
       setLoadingMetrics(false);
@@ -103,11 +114,17 @@ export function useRealPools(programId?: PublicKey) {
     fetchPoolMetrics();
   }, [fetchPoolMetrics]);
 
+  // Wrapper function that refreshes both pool data and metrics
+  const refreshAllPools = useCallback(() => {
+    refreshPools();
+    // Metrics will be refreshed automatically when poolInfos changes
+  }, [refreshPools]);
+
   return {
     pools,
     loading: loading || loadingMetrics,
     error,
-    refreshPools,
+    refreshPools: refreshAllPools,
     lastUpdate,
   };
 }

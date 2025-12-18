@@ -37,12 +37,18 @@ export function usePools(programId?: PublicKey) {
   const [tokenDecimals, setTokenDecimals] = useState<Map<string, number>>(new Map());
 
   const fetchPools = useCallback(async () => {
-    if (!programId || !connection) return;
+    if (!programId || !connection) {
+      setPools([]);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
+      console.log(`[usePools] Fetching pools for program: ${programId.toString()}`);
+      
       // Fetch all pool accounts from the program
       const accounts = await connection.getProgramAccounts(programId, {
         filters: [
@@ -51,20 +57,42 @@ export function usePools(programId?: PublicKey) {
         commitment: 'confirmed',
       });
 
+      console.log(`[usePools] Found ${accounts.length} accounts with size ${POOL_DATA_SIZE}`);
+
       const poolInfos: PoolInfo[] = [];
+      let validPools = 0;
+      let invalidDiscriminator = 0;
+      let parseErrors = 0;
 
       for (const account of accounts) {
         try {
           const data = account.account.data;
 
-          // Check discriminator
-          const discriminator = data.slice(0, 8);
-          if (!discriminator.equals(POOL_DISCRIMINATOR)) {
-            console.warn('Skipping account with invalid discriminator:', account.pubkey.toString());
+          // Validate data length
+          if (data.length < POOL_DATA_SIZE) {
+            console.warn(`[usePools] Account ${account.pubkey.toString()} has insufficient data: ${data.length} < ${POOL_DATA_SIZE}`);
             continue;
           }
 
-          // Parse pool data according to the program structure
+          // Check discriminator
+          const discriminator = data.slice(0, 8);
+          if (!discriminator.equals(POOL_DISCRIMINATOR)) {
+            invalidDiscriminator++;
+            console.warn(`[usePools] Invalid discriminator for ${account.pubkey.toString()}. Expected:`, Array.from(POOL_DISCRIMINATOR), 'Got:', Array.from(discriminator));
+            continue;
+          }
+
+          // Parse pool data according to the program structure (based on IDL)
+          // Offset 0-7: discriminator (already checked)
+          // Offset 8-39: mintA (32 bytes)
+          // Offset 40-71: mintB (32 bytes)
+          // Offset 72-103: vaultA (32 bytes)
+          // Offset 104-135: vaultB (32 bytes)
+          // Offset 136-167: lpMint (32 bytes)
+          // Offset 168-169: feeBps (u16, little-endian)
+          // Offset 170-177: lpSupply (u64, little-endian)
+          // Offset 178-209: creator (32 bytes)
+          
           const mintA = new PublicKey(data.slice(8, 40));
           const mintB = new PublicKey(data.slice(40, 72));
           const vaultA = new PublicKey(data.slice(72, 104));
@@ -85,19 +113,25 @@ export function usePools(programId?: PublicKey) {
             lpSupply,
             creator,
           });
-        } catch (err) {
-          console.warn('Failed to parse pool account:', account.pubkey.toString(), err);
+          validPools++;
+        } catch (err: any) {
+          parseErrors++;
+          console.error(`[usePools] Failed to parse pool account ${account.pubkey.toString()}:`, err);
         }
       }
+
+      console.log(`[usePools] Parsed ${validPools} valid pools (${invalidDiscriminator} invalid discriminators, ${parseErrors} parse errors)`);
 
       setPools(poolInfos);
       setLastUpdate(new Date());
       
-      if (poolInfos.length === 0) {
-        console.warn('No pools found on-chain. Make sure pools are initialized.');
+      if (poolInfos.length === 0 && accounts.length > 0) {
+        console.warn('[usePools] Accounts found but no valid pools parsed. Check discriminator and data structure.');
+      } else if (poolInfos.length === 0) {
+        console.info('[usePools] No pools found on-chain. Make sure pools are initialized.');
       }
     } catch (err: any) {
-      console.error('Failed to fetch pools:', err);
+      console.error('[usePools] Failed to fetch pools:', err);
       setError(err.message || 'Failed to fetch pools');
       
       // Fallback to empty array on error
@@ -108,21 +142,22 @@ export function usePools(programId?: PublicKey) {
   }, [programId, connection]);
 
   useEffect(() => {
+    if (!programId || !connection) {
+      setPools([]);
+      return;
+    }
+
     fetchPools();
 
-    // Set up auto-refresh every 10 seconds
+    // Set up auto-refresh every 30 seconds (reduced frequency)
     const interval = setInterval(() => {
       fetchPools();
-    }, 10000);
+    }, 30000);
 
     return () => clearInterval(interval);
-  }, [fetchPools]);
+  }, [fetchPools, programId, connection]);
 
-  useEffect(() => {
-    fetchPools();
-  }, [programId, connection]);
-
-  // Buscar decimais dos tokens conhecidos
+  // Fetch decimals for known tokens
   useEffect(() => {
     if (!connection) return;
 
@@ -136,7 +171,7 @@ export function usePools(programId?: PublicKey) {
           decimalsMap.set(token.mint.toString(), mintInfo.decimals);
         } catch (err) {
           console.warn(`Failed to fetch decimals for ${token.mint.toString()}:`, err);
-          // Usar decimais padrão se falhar
+          // Use default decimals if fetch fails
           decimalsMap.set(token.mint.toString(), token.decimals);
         }
       }
@@ -150,7 +185,7 @@ export function usePools(programId?: PublicKey) {
   const getAvailableTokens = (): TokenInfo[] => {
     const tokenMap = new Map<string, TokenInfo>();
 
-    // Primeiro, adicionar tokens conhecidos (SOL + tokens mintados)
+    // First, add known tokens (SOL + minted tokens)
     const knownTokens = getKnownTokens();
     knownTokens.forEach(token => {
       const mintKey = token.mint.toString();
@@ -163,7 +198,7 @@ export function usePools(programId?: PublicKey) {
       });
     });
 
-    // Depois, adicionar tokens dos pools (pode sobrescrever se já existir)
+    // Then, add tokens from pools (may overwrite if already exists)
     pools.forEach(pool => {
       // Token A
       const mintAKey = pool.mintA.toString();
@@ -176,7 +211,7 @@ export function usePools(programId?: PublicKey) {
           decimals,
         });
       } else {
-        // Atualizar decimais se já existe
+        // Update decimals if already exists
         const existing = tokenMap.get(mintAKey)!;
         const decimals = tokenDecimals.get(mintAKey) ?? existing.decimals;
         tokenMap.set(mintAKey, { ...existing, decimals });
@@ -193,7 +228,7 @@ export function usePools(programId?: PublicKey) {
           decimals,
         });
       } else {
-        // Atualizar decimais se já existe
+        // Update decimals if already exists
         const existing = tokenMap.get(mintBKey)!;
         const decimals = tokenDecimals.get(mintBKey) ?? existing.decimals;
         tokenMap.set(mintBKey, { ...existing, decimals });
@@ -271,18 +306,18 @@ function getKnownTokens(): TokenInfo[] {
   ];
 }
 
-// Funções auxiliares para identificar tokens comuns
+// Helper functions to identify common tokens
 function getTokenSymbol(mint: PublicKey): string {
   const mintStr = mint.toString();
 
-  // Tokens do Aegis Protocol na devnet
+  // Aegis Protocol tokens on devnet
   const tokenMap: Record<string, string> = {
     'GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9': 'AEGIS',
     'DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3': 'AERO',
     '3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc': 'ABTC',
     'D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys': 'AUSD',
     '7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15': 'ASOL',
-    // Tokens comuns na devnet
+    // Common tokens on devnet
     'So1111111111111111111111111111111112': 'SOL',
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
@@ -303,7 +338,7 @@ function getTokenName(mint: PublicKey): string {
     '3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc': 'Aegis Bitcoin',
     'D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys': 'Aegis USD',
     '7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15': 'Aegis SOL',
-    // Tokens comuns na devnet
+    // Common tokens on devnet
     'So1111111111111111111111111111111112': 'Solana',
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USD Coin',
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'Tether USD',

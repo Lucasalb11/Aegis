@@ -10,3 +10,4 @@ aegis-protocol/.env
 aegis-protocol/.env.*
 aegis-protocol/.secrets/
 test-ledger/
+local/wallets/

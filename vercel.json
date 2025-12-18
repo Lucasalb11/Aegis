@@ -1,6 +1,6 @@
 {
   "buildCommand": "cd aegis-frontend && pnpm run build",
   "devCommand": "cd aegis-frontend && pnpm run dev",
-  "installCommand": "cd aegis-protocol/sdk && pnpm install && pnpm run build && cd ../../aegis-frontend && pnpm install",
+  "installCommand": "bash install.sh",
   "outputDirectory": "aegis-frontend/.next"
 }

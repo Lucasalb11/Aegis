@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prepare-sdk": "cd ../aegis-protocol/sdk && pnpm install && pnpm run build",
+    "prepare-sdk": "bash -c 'cd ../aegis-protocol/sdk && pnpm install && pnpm run build'",
     "prebuild": "pnpm run prepare-sdk",
     "dev": "next dev",
     "build": "next build",

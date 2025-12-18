@@ -1,0 +1,46 @@
+{
+  "tokens": [
+    {
+      "mint": "So1111111111111111111111111111111112",
+      "symbol": "SOL",
+      "name": "Wrapped SOL",
+      "decimals": 9
+    },
+    {
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    {
+      "mint": "GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9",
+      "symbol": "AEGIS",
+      "name": "Aegis Token",
+      "decimals": 6
+    },
+    {
+      "mint": "DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3",
+      "symbol": "AERO",
+      "name": "Aero Token",
+      "decimals": 6
+    },
+    {
+      "mint": "3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc",
+      "symbol": "ABTC",
+      "name": "Aegis Bitcoin",
+      "decimals": 6
+    },
+    {
+      "mint": "D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys",
+      "symbol": "AUSD",
+      "name": "Aegis USD",
+      "decimals": 6
+    },
+    {
+      "mint": "7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15",
+      "symbol": "ASOL",
+      "name": "Aegis SOL",
+      "decimals": 6
+    }
+  ]
+}

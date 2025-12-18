@@ -109,6 +109,10 @@ program/wallets/
 program/backups/
 **/wallets/
 **/backups/
+**/wallets.json
+**/test-wallets.json
+.secrets/
+local/
 
 # Rust
 Cargo.lock

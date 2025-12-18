@@ -179,10 +179,17 @@ pub fn initialize_pool(ctx: Context<InitializePool>, fee_bps: u16) -> Result<()>
     pool.fee_bps = fee_bps;
     pool.lp_supply = 0;
     pool.creator = ctx.accounts.payer.key();
+    pool.created_at = Clock::get()?.unix_timestamp;
     pool.bump = ctx.bumps.pool;
     pool.vault_a_bump = ctx.bumps.vault_a;
     pool.vault_b_bump = ctx.bumps.vault_b;
     pool.lp_mint_bump = ctx.bumps.lp_mint;
+    pool.emergency_mode = false;
+    pool.max_daily_volume = 0;
+    pool.current_daily_volume = 0;
+    pool.last_volume_reset = Clock::get()?.unix_timestamp;
+    pool.version = 1;
+    pool.features_flags = 0;
     pool.reward_points = 0;
     pool.swap_count = 0;
     pool.last_reward_claim_ts = 0;

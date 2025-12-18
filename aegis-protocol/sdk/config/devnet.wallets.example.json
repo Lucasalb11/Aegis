@@ -1,0 +1,13 @@
+{
+  "wallets": [
+    {
+      "path": "./local/wallets/wallet-0.json",
+      "publicKey": ""
+    },
+    {
+      "path": "./local/wallets/wallet-1.json",
+      "publicKey": ""
+    }
+  ],
+  "note": "This file should contain paths to 50 keypair files. Each keypair file should be a JSON array of 64 numbers (secret key). Public keys will be auto-populated when wallets are loaded."
+}

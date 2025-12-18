@@ -12,7 +12,7 @@ pub use state::*;
 use instructions::*;
 use anchor_lang::prelude::*;
 
-declare_id!("FqGarB7xanZe2PWXxsFdxMgkYF1kR4q6E1VSSWsTgBc9");
+declare_id!("AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu");
 
 #[program]
 pub mod aegis_protocol {

@@ -23,7 +23,7 @@ export interface Wallet {
 }
 
 const DEFAULT_CONFIG: AegisConfig = {
-  programId: new PublicKey('FqGarB7xanZe2PWXxsFdxMgkYF1kR4q6E1VSSWsTgBc9'),
+  programId: new PublicKey('AerttabNDRDQkaHZBKka1JFGytct6Bx5hV5Jonrvwryu'),
   cluster: 'devnet',
 };
 

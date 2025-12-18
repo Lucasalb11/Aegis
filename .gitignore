@@ -50,3 +50,26 @@ lerna-debug.log*
 *.swp
 *.swo
 *~
+
+# Lock files (keep only pnpm-lock.yaml)
+package-lock.json
+yarn.lock
+
+# Mockups and temporary design files
+**/all_liquidity_pools,_variant_*/
+**/*variant*.html
+**/*variant*.png
+
+# Temporary documentation files
+**/RESUMO_FINAL.md
+**/RESULTADO_OTIMIZADO.md
+**/ACAO_IMEDIATA.md
+**/BUG_REPORT.md
+**/COMANDOS_RAPIDOS.md
+**/COMO_PROSSEGUIR.md
+**/LIMPEZA_REALIZADA.md
+**/POOL_CREATION_ISSUE_DIAGNOSIS.md
+**/RELATORIO_TESTE_POOLS.md
+**/STATUS_FINAL_POOLS.md
+**/TESTE_FRONTEND.md
+**/TESTING_GUIDE.md

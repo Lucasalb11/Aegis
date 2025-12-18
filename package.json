@@ -1,0 +1,10 @@
+{
+  "name": "aegis-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "cd aegis-frontend && pnpm run build",
+    "dev": "cd aegis-frontend && pnpm run dev",
+    "install:all": "cd aegis-protocol/sdk && pnpm install && pnpm run build && cd ../../aegis-frontend && pnpm install"
+  }
+}

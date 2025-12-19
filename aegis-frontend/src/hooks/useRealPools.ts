@@ -37,11 +37,11 @@ export function useRealPools(programId?: PublicKey) {
             const [tokenAInfo, tokenBInfo] = await Promise.all([
               getTokenMetadata(connection, poolInfo.mintA).catch(err => {
                 console.warn(`[useRealPools] Failed to get metadata for token A ${poolInfo.mintA.toString()}:`, err);
-                return { symbol: 'UNKNOWN', name: 'Unknown Token', decimals: 6 };
+                return { symbol: 'UNKNOWN', name: 'Unknown Token', decimals: 6, icon: undefined };
               }),
               getTokenMetadata(connection, poolInfo.mintB).catch(err => {
                 console.warn(`[useRealPools] Failed to get metadata for token B ${poolInfo.mintB.toString()}:`, err);
-                return { symbol: 'UNKNOWN', name: 'Unknown Token', decimals: 6 };
+                return { symbol: 'UNKNOWN', name: 'Unknown Token', decimals: 6, icon: undefined };
               }),
             ]);
 

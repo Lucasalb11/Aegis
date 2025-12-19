@@ -141,11 +141,13 @@ export async function calculatePoolTVL(
         symbol: poolInfo.mintA.toString().slice(0, 4),
         name: 'Unknown Token',
         decimals: 6,
+        icon: undefined,
       })),
       getTokenMetadata(connection, poolInfo.mintB).catch(() => ({
         symbol: poolInfo.mintB.toString().slice(0, 4),
         name: 'Unknown Token',
         decimals: 6,
+        icon: undefined,
       })),
     ]);
 
@@ -196,13 +198,13 @@ export async function calculatePoolTVL(
         symbol: tokenAInfo.symbol,
         amount: amountA,
         usd: usdA,
-        icon: tokenAInfo.icon,
+        icon: tokenAInfo.icon || '',
       },
       tokenB: {
         symbol: tokenBInfo.symbol,
         amount: amountB,
         usd: usdB,
-        icon: tokenBInfo.icon,
+        icon: tokenBInfo.icon || '',
       },
     };
   } catch (error: any) {

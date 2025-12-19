@@ -51,11 +51,6 @@ export default function PoolsPage() {
                 ? `Showing ${pools.length} pools${realPools.length > 0 ? ` (${realPools.length} on-chain)` : ''} • Last updated: ${lastUpdate?.toLocaleTimeString()}`
                 : "No pools found. Create your first pool to get started!"}
             </p>
-            {isMockData && (
-              <p className="text-yellow-400/80 text-xs mt-1">
-                Demo mode: Showing mock data. Connect wallet and create pools for real trading.
-              </p>
-            )}
           </div>
           <div className="flex gap-2">
             <button
@@ -113,17 +108,6 @@ export default function PoolsPage() {
           </div>
         </div>
 
-        {isMockData && (
-          <div className="mb-4 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-400">⚡</span>
-              <p className="text-yellow-400 text-sm font-semibold">Demo Mode Active</p>
-            </div>
-            <p className="text-yellow-300/80 text-sm mt-1">
-              Showing mock pools for demonstration. Create real pools on Solana devnet to see live data.
-            </p>
-          </div>
-        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-20">

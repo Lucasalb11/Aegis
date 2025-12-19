@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import Link from "next/link";
 import { TopNav } from "@/components/TopNav";
 import { PoolCard } from "@/components/PoolCard";
-import { useRealPools } from "@/src/hooks/useRealPools";
+import { useHybridPools } from "@/src/hooks/useHybridPools";
 import { PublicKey } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 
@@ -25,7 +25,7 @@ function getProgramId(): PublicKey | undefined {
 
 export default function PoolsPage() {
   const [programId] = useState(() => getProgramId());
-  const { pools, loading, error, refreshPools, lastUpdate } = useRealPools(programId);
+  const { pools, loading, error, refreshPools, lastUpdate, isMockData, realPools } = useHybridPools(programId);
 
   useEffect(() => {
     if (programId) {
@@ -48,9 +48,14 @@ export default function PoolsPage() {
               {loading
                 ? "Loading pools from blockchain..."
                 : pools.length > 0
-                ? `Showing ${pools.length} active pools • Last updated: ${lastUpdate?.toLocaleTimeString()}`
+                ? `Showing ${pools.length} pools${realPools.length > 0 ? ` (${realPools.length} on-chain)` : ''} • Last updated: ${lastUpdate?.toLocaleTimeString()}`
                 : "No pools found. Create your first pool to get started!"}
             </p>
+            {isMockData && (
+              <p className="text-yellow-400/80 text-xs mt-1">
+                Demo mode: Showing mock data. Connect wallet and create pools for real trading.
+              </p>
+            )}
           </div>
           <div className="flex gap-2">
             <button
@@ -108,13 +113,25 @@ export default function PoolsPage() {
           </div>
         </div>
 
+        {isMockData && (
+          <div className="mb-4 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-400">⚡</span>
+              <p className="text-yellow-400 text-sm font-semibold">Demo Mode Active</p>
+            </div>
+            <p className="text-yellow-300/80 text-sm mt-1">
+              Showing mock pools for demonstration. Create real pools on Solana devnet to see live data.
+            </p>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-white/60">Loading pools from blockchain...</div>
           </div>
         ) : pools.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-white/60 mb-4">No pools found on-chain.</p>
+            <p className="text-white/60 mb-4">No pools available.</p>
             <Link
               href="/pools/create"
               className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"

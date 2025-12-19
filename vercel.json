@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm run build",
-  "devCommand": "pnpm run dev",
-  "installCommand": "pnpm install",
-  "outputDirectory": ".next"
+  "buildCommand": "cd aegis-frontend && yarn run build",
+  "devCommand": "cd aegis-frontend && yarn run dev",
+  "installCommand": "cd aegis-frontend && yarn install --frozen-lockfile",
+  "outputDirectory": "aegis-frontend/.next"
 }

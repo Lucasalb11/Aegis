@@ -5,9 +5,9 @@ echo "🚀 Starting installation process..."
 
 # Build SDK first
 echo "📦 Installing and building SDK..."
-cd aegis-protocol/sdk
-pnpm install || npm install -g pnpm && pnpm install
-pnpm run build
+cd aegis-protocol
+yarn install --frozen-lockfile || yarn install
+yarn workspace @aegis/sdk run build
 
 # Verify SDK was built
 if [ ! -d "dist" ]; then
@@ -19,7 +19,7 @@ echo "✅ SDK built successfully"
 
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
-cd ../../aegis-frontend
-pnpm install
+cd ../aegis-frontend
+yarn install --frozen-lockfile || yarn install
 
 echo "✅ Installation completed successfully!"

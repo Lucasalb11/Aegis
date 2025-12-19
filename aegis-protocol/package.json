@@ -8,12 +8,12 @@
     "sdk"
   ],
   "scripts": {
-    "dev": "pnpm --recursive run dev",
-    "build": "pnpm --recursive run build",
-    "clean": "pnpm --recursive run clean",
+    "dev": "yarn workspaces run dev",
+    "build": "yarn workspaces run build",
+    "clean": "yarn workspaces run clean",
     "deploy:devnet": "./scripts/deploy-devnet.sh",
     "deploy:mainnet": "./scripts/deploy-mainnet.sh",
-    "test": "pnpm --recursive run test"
+    "test": "yarn workspaces run test"
   },
   "keywords": [
     "solana",

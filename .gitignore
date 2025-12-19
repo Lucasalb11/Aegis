@@ -51,9 +51,9 @@ lerna-debug.log*
 *.swo
 *~
 
-# Lock files (keep only pnpm-lock.yaml)
+# Lock files (prefer yarn, ignore npm/pnpm)
 package-lock.json
-yarn.lock
+pnpm-lock.yaml
 
 # Mockups and temporary design files
 **/all_liquidity_pools,_variant_*/

@@ -264,46 +264,35 @@ export function usePools(programId?: PublicKey) {
   };
 }
 
+// Token addresses as strings to avoid SSR issues
+const KNOWN_TOKEN_DATA = [
+  { address: 'So1111111111111111111111111111111112', symbol: 'SOL', name: 'Solana', decimals: 9 },
+  { address: 'GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9', symbol: 'AEGIS', name: 'Aegis Token', decimals: 6 },
+  { address: 'DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3', symbol: 'AERO', name: 'Aero Token', decimals: 6 },
+  { address: '3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc', symbol: 'ABTC', name: 'Aegis Bitcoin', decimals: 6 },
+  { address: 'D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys', symbol: 'AUSD', name: 'Aegis USD', decimals: 6 },
+  { address: '7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15', symbol: 'ASOL', name: 'Aegis SOL', decimals: 6 },
+];
+
 // Lista de tokens conhecidos (SOL + tokens mintados do Aegis Protocol)
+// Cria PublicKeys de forma lazy para evitar problemas de SSR
 function getKnownTokens(): TokenInfo[] {
-  return [
-    {
-      mint: new PublicKey('So1111111111111111111111111111111112'), // Wrapped SOL (devnet/mainnet)
-      symbol: 'SOL',
-      name: 'Solana',
-      decimals: 9,
-    },
-    {
-      mint: new PublicKey('GN4CDgz5N3AyoM2pgbzeojaM6n9A3BkMjbXD29Hv53Q9'), // AEGIS
-      symbol: 'AEGIS',
-      name: 'Aegis Token',
-      decimals: 6,
-    },
-    {
-      mint: new PublicKey('DAWQbsTWz79AApBEWeb4mvjui9XkjprYroKh2gheCoj3'), // AERO
-      symbol: 'AERO',
-      name: 'Aero Token',
-      decimals: 6,
-    },
-    {
-      mint: new PublicKey('3CDvX4g72rMeS44tNe4EDifYDrq1S2qc7c8ra74tvWzc'), // ABTC
-      symbol: 'ABTC',
-      name: 'Aegis Bitcoin',
-      decimals: 6,
-    },
-    {
-      mint: new PublicKey('D14T791rbVoZhiovmostvM9QaRC2tNUmgT9mEF2viys'), // AUSD
-      symbol: 'AUSD',
-      name: 'Aegis USD',
-      decimals: 6,
-    },
-    {
-      mint: new PublicKey('7LNopo3uG7G9Qz5qcDvdZp1Lh4uGQWpaaLHZzbjvvv15'), // ASOL
-      symbol: 'ASOL',
-      name: 'Aegis SOL',
-      decimals: 6,
-    },
-  ];
+  // Verificar se estamos no lado do cliente
+  if (typeof window === 'undefined') {
+    return [];
+  }
+  
+  try {
+    return KNOWN_TOKEN_DATA.map(token => ({
+      mint: new PublicKey(token.address),
+      symbol: token.symbol,
+      name: token.name,
+      decimals: token.decimals,
+    }));
+  } catch (error) {
+    console.error('[usePools] Error creating known tokens:', error);
+    return [];
+  }
 }
 
 // Helper functions to identify common tokens

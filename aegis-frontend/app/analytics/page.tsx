@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { TopNav } from "@/components/TopNav";
 import { useAnalytics } from "@/src/hooks/useAnalytics";
 import { useAegis } from "@/src/providers/AegisProvider";

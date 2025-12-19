@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import Link from "next/link";
 import { TopNav } from "@/components/TopNav";
 import { PoolCard } from "@/components/PoolCard";

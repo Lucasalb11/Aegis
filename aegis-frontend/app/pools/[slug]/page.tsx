@@ -1,16 +1,26 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { notFound } from "next/navigation";
 import { useRealPools } from "@/src/hooks/useRealPools";
 import { PublicKey } from "@solana/web3.js";
+import { useMemo } from "react";
 import PoolDetailClient from "./PoolDetailClient";
 
-const PROGRAM_ID = process.env.NEXT_PUBLIC_AEGIS_PROGRAM_ID
-  ? new PublicKey(process.env.NEXT_PUBLIC_AEGIS_PROGRAM_ID)
-  : undefined;
+function getProgramId(): PublicKey | undefined {
+  const programIdStr = process.env.NEXT_PUBLIC_AEGIS_PROGRAM_ID;
+  if (!programIdStr) return undefined;
+  try {
+    return new PublicKey(programIdStr);
+  } catch {
+    return undefined;
+  }
+}
 
 export default function PoolDetail({ params }: { params: { slug: string } }) {
-  const { pools, loading } = useRealPools(PROGRAM_ID);
+  const programId = useMemo(() => getProgramId(), []);
+  const { pools, loading } = useRealPools(programId);
   
   if (loading) {
     return (

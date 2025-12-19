@@ -36,6 +36,17 @@ export interface SwapResult {
   fee: BN;
 }
 
+export interface RemoveLiquidityParams {
+  lpAmount: BN;
+}
+
+export interface RemoveLiquidityResult {
+  pool: PublicKey;
+  lpBurned: BN;
+  amountAReceived: BN;
+  amountBReceived: BN;
+}
+
 export interface AegisConfig {
   programId: PublicKey;
   cluster: 'devnet' | 'mainnet-beta' | 'testnet';

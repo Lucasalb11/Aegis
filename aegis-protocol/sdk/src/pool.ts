@@ -18,7 +18,7 @@ import {
 import BN from 'bn.js';
 
 import { Aegis } from './aegis';
-import { PoolInfo, LiquidityParams, SwapParams, AddLiquidityResult, SwapResult } from './types';
+import { PoolInfo, LiquidityParams, SwapParams, AddLiquidityResult, SwapResult, RemoveLiquidityParams, RemoveLiquidityResult } from './types';
 import { findPoolAddress, findPoolVaultAddress, findLpMintAddress } from './utils';
 
 export class Pool {
@@ -223,6 +223,64 @@ export class Pool {
         { pubkey: userDestination, isSigner: false, isWritable: true },
         { pubkey: sourceMint, isSigner: false, isWritable: false },
         { pubkey: destinationMint, isSigner: false, isWritable: false },
+        { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      ],
+      programId: this.aegis.programId,
+      data,
+    });
+  }
+
+  async removeLiquidity(
+    params: RemoveLiquidityParams,
+    userLpToken: PublicKey,
+    userTokenA: PublicKey,
+    userTokenB: PublicKey
+  ): Promise<RemoveLiquidityResult> {
+    const instruction = await this.createRemoveLiquidityInstruction(
+      params,
+      userLpToken,
+      userTokenA,
+      userTokenB
+    );
+
+    const transaction = new Transaction().add(instruction);
+    await this.aegis.sendTransaction(transaction);
+
+    // Return result (actual amounts would be calculated from transaction)
+    return {
+      pool: this.info.address,
+      lpBurned: params.lpAmount,
+      amountAReceived: new BN(0), // Would be calculated from actual transaction
+      amountBReceived: new BN(0),
+    };
+  }
+
+  private async createRemoveLiquidityInstruction(
+    params: RemoveLiquidityParams,
+    userLpToken: PublicKey,
+    userTokenA: PublicKey,
+    userTokenB: PublicKey
+  ): Promise<TransactionInstruction> {
+    // Discriminator from IDL for removeLiquidity
+    const discriminator = Buffer.from([80, 85, 209, 72, 24, 206, 177, 108]);
+    
+    // Serialize lp_amount (u64) in little-endian
+    const lpAmountBuffer = Buffer.alloc(8);
+    lpAmountBuffer.writeBigUInt64LE(BigInt(params.lpAmount.toString()));
+    
+    // Combine discriminator + args
+    const data = Buffer.concat([discriminator, lpAmountBuffer]);
+
+    return new TransactionInstruction({
+      keys: [
+        { pubkey: this.aegis.wallet.publicKey, isSigner: true, isWritable: true },
+        { pubkey: this.info.address, isSigner: false, isWritable: true },
+        { pubkey: this.info.vaultA, isSigner: false, isWritable: true },
+        { pubkey: this.info.vaultB, isSigner: false, isWritable: true },
+        { pubkey: this.info.lpMint, isSigner: false, isWritable: true },
+        { pubkey: userLpToken, isSigner: false, isWritable: true },
+        { pubkey: userTokenA, isSigner: false, isWritable: true },
+        { pubkey: userTokenB, isSigner: false, isWritable: true },
         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       ],
       programId: this.aegis.programId,

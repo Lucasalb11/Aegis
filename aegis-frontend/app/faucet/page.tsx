@@ -295,7 +295,12 @@ export default function FaucetPage() {
         {/* Claim Button */}
         <button
           onClick={handleClaim}
-          disabled={!connected || loading || selectedTokens.size === 0 || (faucetStatus && !faucetStatus.canClaim)}
+          disabled={
+            !connected ||
+            loading ||
+            selectedTokens.size === 0 ||
+            faucetStatus?.canClaim === false
+          }
           className="h-14 px-6 rounded-lg bg-primary text-white text-lg font-bold tracking-wide hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (

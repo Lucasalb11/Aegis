@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canClaim, getCooldownHours } from '@/src/lib/faucetStore';
 
+// Ensure this route stays dynamic to avoid static rendering errors
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
